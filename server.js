@@ -45,7 +45,7 @@ const getBoard = async (gameId) => {
     setHeaders()
     const response = await axios.get(`${BASE_URL}?type=boardString&gameId=${gameId}`)
 
-    console.log(response.data)
+    // console.log(response.data)
 
     return response.data
 }
@@ -100,7 +100,7 @@ app.get('/board', async (req,res) => {
 
 app.get('/gamelist', async (req,res) => {
     const data = await gameList()
-    console.log("GAME LIST: ", data)
+    // console.log("GAME LIST: ", data)
     res.json(data)
 })
 
@@ -111,7 +111,7 @@ app.post('/creategame', async (req,res) => {
     const teamId1 = 1243
     const teamId2 = 1246
     const data = await createGame(teamId1,teamId2,boardSize)
-    console.log(data)
+    // console.log(data)
     res.json(data)
 })
 
@@ -126,7 +126,7 @@ app.post('/move', async (req,res) => {
         params.append('teamId', teamId)
         params.append('move', move)
         const response = await axios.post(BASE_URL,params)
-        console.log(response.data)
+        // console.log(response.data)
 
         if(response.data.code === "FAIL")
             return res.json({code: "FAIL", moveId: -1})
