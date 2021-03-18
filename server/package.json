@@ -1,14 +1,14 @@
 {
-  "name": "server",
+  "name": "tictactoen_server",
   "version": "1.0.0",
-  "description": "",
+  "description": "GWU AI Course TicTacToe AI Project",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["TicTacToe AI"],
+  "author": "David Ahmadov",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
