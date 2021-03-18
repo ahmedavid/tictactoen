@@ -5,7 +5,7 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 
-app.use('/',express.static(path.join(__dirname,'../build')))
+app.use('/',express.static(path.join(__dirname,'build')))
 app.use(bodyParser.json())
 app.use(cors())
 
