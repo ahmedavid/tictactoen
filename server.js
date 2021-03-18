@@ -104,6 +104,10 @@ app.get('/gamelist', async (req,res) => {
     res.json(data)
 })
 
+app.get('/*', async (req,res) => {
+    res.redirect('/')
+})
+
 
 app.post('/creategame', async (req,res) => {
     const boardSize = req.query['boardSize']
