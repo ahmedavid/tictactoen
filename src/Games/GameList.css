@@ -1,0 +1,7 @@
+.game_list_item {
+    cursor: pointer;
+}
+
+.game_list_item:hover {
+    background-color: #ccc;
+}

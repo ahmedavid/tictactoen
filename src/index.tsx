@@ -2,16 +2,47 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import { usePromiseTracker } from "react-promise-tracker";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+import {
+  BrowserRouter as Router,
+} from "react-router-dom";
+import Loader from 'react-loader-spinner';
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+
+ const LoadingIndicator = () => {
+    const { promiseInProgress } = usePromiseTracker()
+    
+    return (
+      <div
+        style={{
+          zIndex:100,
+          position: "absolute",
+          top:0,
+          left:0,
+          bottom:0,
+          right:0,
+          backgroundColor: "#00000080",
+          width: "100%",
+          height: "100%",
+          display: promiseInProgress? "flex" : "none",
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+      >
+        <Loader type="ThreeDots" color="#2BAD60" height="100" width="100" />
+      </div>
+    );  
+  }
+
+  ReactDOM.render(
+    <Router>
+        <React.StrictMode>
+          <div style={{position:"relative",width:"100%",height:"100%"}}>
+            <LoadingIndicator/>
+            <App/>
+          </div>
+        </React.StrictMode>
+    </Router>,
+    document.getElementById('root')
+  );

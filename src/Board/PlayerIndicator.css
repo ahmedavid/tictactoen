@@ -1,0 +1,24 @@
+.player_indicator {
+    width: 200px;
+    height: 80px;
+    background-color: #ccc;
+    display: flex;
+}
+.player_indicator_item {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    font-size: 46px;
+}
+
+.player_indicator_item_active {
+    background-color: #26d8d8;
+}
+
+.player_indicator_item_x {
+}
+.player_indicator_item_o {
+}

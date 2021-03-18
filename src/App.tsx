@@ -1,25 +1,34 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import './App.css';
+import { GameDetail } from './Games/GameDetail';
+import { GameList } from './Games/GameList';
+import { GameLogin } from './Login/GameLogin';
+import { APIClient } from './utils/APIClient';
 
-function App() {
+const apiClient = APIClient.getInstance()
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Switch>
+          <Route path="/game/login">
+            <GameLogin/>
+          </Route>
+          <Route path="/game/:team1Id/:team2Id/:gameId">
+            <GameDetail apiClient={apiClient}/>
+          </Route>
+          <Route path="/game">
+            <GameList apiClient={apiClient}/>
+          </Route>
+          <Route path="/" >
+            <Redirect to="/game"/>
+          </Route>
+        </Switch>
+      </div>
+
+    </Router>
   );
 }
 
