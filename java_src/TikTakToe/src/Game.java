@@ -7,9 +7,12 @@ public class Game {
     public byte[][] GameState;
     public byte nextPlayer = 0;
 
+
     public Game(int number, byte nextPlayer)
     {
         GameState = new byte[number][number];
+
+        printBoard(GameState);
     }
 
     //make value int type
@@ -248,5 +251,34 @@ public class Game {
         //notify.Execute(game.GetNextPlayer());
 
         return game;
+    }
+
+    // print board
+    public void printBoard(byte[][] board){
+
+        int boardSize = GetN();// NxN dimension
+
+        System.out.print("    ");
+        for (int i = 0; i < boardSize; i++) {
+            if(i<10)
+                System.out.print(i + " | ");
+            else
+                System.out.print(i + "| ");
+        }
+
+        System.out.println();
+
+        for (int i = 0; i < boardSize; i++) {
+
+            if(i<10)
+                System.out.print(i+" | ");
+            else
+                System.out.print(i+"| ");
+
+            for (int j = 0; j < boardSize; j++) {
+                System.out.print(board[i][j] + " | ");
+            }
+            System.out.println();
+        }
     }
 }
