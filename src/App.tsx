@@ -68,7 +68,8 @@ const App = () => {
 
   useEffect(() => {
     handleCheckLogin()
-  },[])
+  },
+  [])
 
   if(!appState.isLoggedin) {
     return <GameLogin checkLogin={handleCheckLogin}/>
