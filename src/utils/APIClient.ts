@@ -58,9 +58,12 @@ export class APIClient {
         return new APIClient()
     }
 
-    async createGame(teamId1:number, teamId2: number,boardSize:number) {
+    async createGame(teamId1:number, teamId2: number,boardSize:number, target: number) {
         try {
-            const response = await axios.post(`${BASE_URL}creategame?teamId1=${teamId1}&teamId2=${teamId2}&boardSize=${boardSize}`)
+            let mainPart = `${BASE_URL}creategame?teamId1=${teamId1}&teamId2=${teamId2}&boardSize=${boardSize}`
+            if(target) 
+                mainPart = `${mainPart}&target=${target}`
+            const response = await axios.post(mainPart)
             return response.data
         } catch (error) {
             console.log("ERROR:", error)            
