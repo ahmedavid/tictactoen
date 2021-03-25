@@ -24,13 +24,18 @@ public class Main {
 
         //1. Create a game local (for having a Game instance)
         Game game = new Game(boardSize, (byte)1);
+        BaseResponse responsee = ApiHelper.GetMyMoves(2051, 10);
 
+        byte[][] newStatee = ParseGameBoard(responsee, boardSize);
+        game.printBoard(newStatee);
         //2. Create a game remote
         BaseResponse response = ApiHelper.CreateGame(teamId1, teamId2, boardSize, target);
         gameId = ParseGameId(response);
 
+
+
         //3. While game is not in Terminal state
-        while(!game.Terminal(game.GameState))
+        while(false && !game.Terminal(game.GameState))
         {
             System.out.println("Board before move:");
             game.printBoard(game.GameState);
@@ -51,9 +56,9 @@ public class Main {
 
             //6. Get the new board state and make a move on behalf of the opponent
             response = ApiHelper.GetMyMoves(gameId, 10);
-            byte[][] newState = ParseGameBoard(response);
+            byte[][] newState = ParseGameBoard(response, boardSize);
 
-            game = game.FromState(newState);
+//            game = game.FromState(newState);
         }
 
         System.out.println(response.ResponseBody);
@@ -71,12 +76,30 @@ public class Main {
         return jsonObject.get("code").getAsString() == "OK";
     }
 
-    public static byte[][] ParseGameBoard(BaseResponse response)
+    public static byte[][] ParseGameBoard(BaseResponse response, int boardSize)
     {
         JsonObject jsonObject = gson.fromJson(response.ResponseBody, JsonObject.class);
 
-        JsonArray movesArray = jsonObject.get("moves").getAsJsonArray();
+        byte[][] byteArr = new byte[boardSize][boardSize];
 
-        return null;
+
+        if(jsonObject.get("code").hashCode() == "OK".hashCode()){
+            int x,y;
+            JsonArray movesArray = jsonObject.get("moves").getAsJsonArray();
+            for (int i = 0; i < movesArray.size(); i++) {
+                JsonObject tmpJsonObject = gson.fromJson(movesArray.get(i),JsonObject.class);
+
+                x = tmpJsonObject.get("moveX").getAsInt();
+                y = tmpJsonObject.get("moveY").getAsInt();
+
+                byteArr[x][y] = tmpJsonObject.get("symbol").hashCode() == "X".hashCode() ? (byte)1 : (byte)-1;
+
+            }
+        }
+
+
+
+
+        return byteArr;
     }
 }

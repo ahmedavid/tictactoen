@@ -25,5 +25,5 @@ yarn-error.log*
 
 # java
 /out
-java_src/TikTakToe/out
+/java_src/TikTakToe/out
 .idea
