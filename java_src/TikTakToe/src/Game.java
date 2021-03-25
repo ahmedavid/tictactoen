@@ -76,6 +76,14 @@ public class Game {
         return newState;
     }
 
+    public Action GetBestMove()
+    {
+        int n = this.GameState.length;
+        int depth = n > 4 ? 4 : n;
+        ActionResult bestMove = this.Minimax(this.GameState, depth, Integer.MIN_VALUE, Integer.MAX_VALUE,false);
+        return bestMove.Action;
+    }
+
     public byte[][] Result(byte[][] state, byte player, Action action) {
         state[action.y][action.x] = player;
         return state;
