@@ -50,6 +50,7 @@ const App = () => {
   const [appState,setAppState] = useState<IAppState>(INIT_APPSTATE)
 
   const handleCheckLogin = async () => {
+    console.log("Handle Check Login...")
     try {
       const result = await checkLogin()
       if(result.status) {
@@ -61,13 +62,13 @@ const App = () => {
       }
     }
     catch(err) {
-      setAppState(INIT_APPSTATE)
+      //setAppState(INIT_APPSTATE)
     }
   }
 
   useEffect(() => {
     handleCheckLogin()
-  })
+  },[])
 
   if(!appState.isLoggedin) {
     return <GameLogin checkLogin={handleCheckLogin}/>
