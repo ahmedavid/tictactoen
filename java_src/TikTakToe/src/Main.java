@@ -4,21 +4,79 @@ import com.google.gson.JsonObject;
 
 public class Main {
 
+    public static Gson gson = new Gson();
+
     public static void main(String[] args) {
-        //Game game = new Game(3, (byte)1);
+        int teamId1 = 1243; //we
+        int teamId2 = 1246;
+        int boardSize = 3;
+        int target = 3;
+        int gameId;
 
-        //BaseResponse response = ApiHelper.CreateGame(1243, 1246, 20, 10);
-        BaseResponse response = ApiHelper.GetMyGames();
+        //1. Create a game local (for having a Game instance)
+        //2. Create a game remote
+        //3. While game is not in Terminal state continue line 4, if Terminal continue line 8
+        //4. Make a best move locally and change player
+        //5. Send your move online
+        //6. Get the new board state and make a move on behalf of the opponent
+        //7. Continue
+        //8. Show winner/loser/draw and finish game
 
-        Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(response.ResponseBody, JsonObject.class);
+        //1. Create a game local (for having a Game instance)
+        Game game = new Game(boardSize, (byte)1);
 
-        JsonArray myGames = jsonObject.get("myGames").getAsJsonArray();
-        for (var game : myGames)
+        //2. Create a game remote
+        BaseResponse response = ApiHelper.CreateGame(teamId1, teamId2, boardSize, target);
+        gameId = ParseGameId(response);
+
+        //3. While game is not in Terminal state
+        while(!game.Terminal(game.GameState))
         {
-            System.out.println("Game: "+game+"\n");
+            System.out.println("Board before move:");
+            game.printBoard(game.GameState);
+            Action bestMove = game.GetBestMove();
+
+            //4. Make a best move locally and change player
+            game.Move(game.nextPlayer, bestMove);
+
+            //5. Send your move online (retry until move sent)
+            response = ApiHelper.MakeMove(gameId, teamId1, bestMove.x, bestMove.y);
+            boolean isSuccessful = IsSuccess(response);
+
+            while(!isSuccessful)
+            {
+                response = ApiHelper.MakeMove(gameId, teamId1, bestMove.x, bestMove.y);
+                isSuccessful = IsSuccess(response);
+            }
+
+            //6. Get the new board state and make a move on behalf of the opponent
+            response = ApiHelper.GetMyMoves(gameId, 10);
+            byte[][] newState = ParseGameBoard(response);
+
+            game = game.FromState(newState);
         }
 
         System.out.println(response.ResponseBody);
+    }
+
+    public static int ParseGameId(BaseResponse response)
+    {
+        JsonObject jsonObject = gson.fromJson(response.ResponseBody, JsonObject.class);
+        return jsonObject.get("gameId").getAsInt();
+    }
+
+    public static boolean IsSuccess(BaseResponse response)
+    {
+        JsonObject jsonObject = gson.fromJson(response.ResponseBody, JsonObject.class);
+        return jsonObject.get("code").getAsString() == "OK";
+    }
+
+    public static byte[][] ParseGameBoard(BaseResponse response)
+    {
+        JsonObject jsonObject = gson.fromJson(response.ResponseBody, JsonObject.class);
+
+        JsonArray movesArray = jsonObject.get("moves").getAsJsonArray();
+
+        return null;
     }
 }
