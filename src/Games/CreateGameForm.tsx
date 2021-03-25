@@ -47,8 +47,8 @@ export const CreateGameForm = ({createGame, team1Id}: IProps) => {
                         setCurrTarget(parseInt(e.target.value))
                     }}>
                     <option key={'bs' + 6} value={6}>6</option>
-                    <option value={'bs' + 12}>12</option>
-                    <option value={'bs' + 20}>20</option>
+                    <option key={'bs' + 12} value={12}>12</option>
+                    <option key={'bs' + 20} value={20}>20</option>
                 </select>
             </div>
 
