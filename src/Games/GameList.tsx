@@ -4,14 +4,15 @@ import './GameList.css'
 import { useHistory } from 'react-router-dom';
 import { ILoginData, isLoggedIn } from '../Login/GameLogin';
 import { IGame,APIClient } from '../utils/APIClient';
+import { CreateGameForm } from './CreateGameForm';
 
 interface IProps {
     apiClient: APIClient
 }
 
 
-let teamId1 = 1243
-let teamId2 = 1246
+// let team1Id = 1243
+// let team2Id = 1246
 
 export const GameList = ({apiClient}: IProps) => {
     const [loginData,setLoginData] = useState<ILoginData>({
@@ -29,8 +30,8 @@ export const GameList = ({apiClient}: IProps) => {
         setGameList(glist)
     }
 
-    const createGame = async () => {
-        await apiClient.createGame(teamId1,teamId2,6)
+    const createGame = async (team1Id:number, team2Id: number,boardSize: number, target: number) => {
+        await apiClient.createGame(team1Id,team2Id,boardSize,target)
         getGameList()
     }
 
@@ -44,7 +45,11 @@ export const GameList = ({apiClient}: IProps) => {
                         const gameId = Object.keys(g)[0]
                         const data = g[gameId]
                         const isOpen = data.endsWith("O") 
-                        return <li style={{backgroundColor:isOpen ? "#28a745" :"#dc3545"}} key={gameId+i} id={gameId} className="list-group-item game_list_item" onClick={e => history.push(`/game/${teamId1}/${teamId2}/${gameId}`)}>ID:{gameId} - {g[gameId]}</li>
+                        return <li 
+                                style={{backgroundColor:isOpen ? "#28a745" :"#dc3545"}} 
+                                key={gameId+i} id={gameId} 
+                                className="list-group-item game_list_item" 
+                                onClick={e => history.push(`/game/${1}/${2}/${gameId}`)}>ID:{gameId} - {g[gameId]}</li>
                     })
                 }
             </ul>
@@ -56,6 +61,8 @@ export const GameList = ({apiClient}: IProps) => {
             if(loginData) {
                 console.log(loginData)
                 setLoginData(loginData)
+                getGameList()
+                console.log(loginData)
             } else {
                 history.push('/game/login')
                 return
@@ -64,13 +71,12 @@ export const GameList = ({apiClient}: IProps) => {
             history.push('/game/login')
             return
         })
-        getGameList()
-        console.log(loginData)
+
     },[])
 
     return (
         <div className="game_list container">
-            <h3 onDoubleClick={e => setShowTeam(false)} style={{display: showTeam ? 'inline-block' : 'none'}}>{team}</h3><span>  (MyTeam)</span>
+            {/* <h3 onDoubleClick={e => setShowTeam(false)} style={{display: showTeam ? 'inline-block' : 'none'}}>{team}</h3><span>  (MyTeam)</span> */}
             <form onSubmit={e => {
                 e.preventDefault()
                 setShowTeam(true)
@@ -80,20 +86,7 @@ export const GameList = ({apiClient}: IProps) => {
                 </div>
             </form>
 
-            <hr/>
-
-            <form className="mt-8">
-                <div className="form-group">
-                    <label htmlFor="opponentTeam">Opponet Team</label>
-                    <input type="text" id="opponentTeam" className="form-control" placeholder="1234"/>
-                </div>
-                <div className="form-group">
-                    <label htmlFor="boardSize">Board Size</label>
-                    <input type="text" id="boardSize" className="form-control" placeholder="6, 12"/>
-                </div>
-
-                <button className="btn btn-primary" onClick={createGame}>Create New Game</button>
-            </form>
+            <CreateGameForm createGame={createGame} team1Id={1}/>
             <hr/>
             <h1>My Games</h1>
 

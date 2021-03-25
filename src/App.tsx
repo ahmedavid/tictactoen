@@ -4,6 +4,7 @@ import './App.css';
 import { GameDetail } from './Games/GameDetail';
 import { GameList } from './Games/GameList';
 import { GameLogin } from './Login/GameLogin';
+import { Navbar } from './Login/Navbar';
 import { APIClient } from './utils/APIClient';
 
 const apiClient = APIClient.getInstance()
@@ -11,6 +12,7 @@ const apiClient = APIClient.getInstance()
 const App = () => {
   return (
     <Router>
+      <Navbar />
       <div className="App">
         <Switch>
           <Route path="/game/login">

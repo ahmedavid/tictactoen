@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom';
 
-const DB_STR = 'ttt_game_login'
+export const DB_STR = 'ttt_game_login'
 
 export interface ILoginData {
     teamId: string
