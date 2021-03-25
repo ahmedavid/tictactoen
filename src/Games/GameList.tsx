@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { trackPromise } from 'react-promise-tracker';
 import './GameList.css'
 import { useHistory } from 'react-router-dom';
-import { ILoginData, isLoggedIn } from '../Login/GameLogin';
+import { ILoginData } from '../Login/GameLogin';
 import { IGame,APIClient } from '../utils/APIClient';
 import { CreateGameForm } from './CreateGameForm';
 
@@ -11,10 +11,6 @@ interface IProps {
 }
 
 export const GameList = ({apiClient}: IProps) => {
-    const [loginData,setLoginData] = useState<ILoginData>({
-        teamId: "",
-        userId: "",
-    })
     const history = useHistory();
     const [showTeam,setShowTeam] = useState(true)
     const [team,setTeam] = useState("HodriMeydan")
@@ -56,20 +52,21 @@ export const GameList = ({apiClient}: IProps) => {
     }
 
     useEffect(() => {
-        isLoggedIn().then((loginData) => {
-            if(loginData) {
-                console.log(loginData)
-                setLoginData(loginData)
-                getGameList()
-                console.log(loginData)
-            } else {
-                history.push('/game/login')
-                return
-            }
-        }).catch(() => {
-            history.push('/game/login')
-            return
-        })
+        getGameList()
+        // isLoggedIn().then((loginData) => {
+        //     if(loginData) {
+        //         console.log(loginData)
+        //         setLoginData(loginData)
+        //         getGameList()
+        //         console.log(loginData)
+        //     } else {
+        //         history.push('/game/login')
+        //         return
+        //     }
+        // }).catch(() => {
+        //     history.push('/game/login')
+        //     return
+        // })
 
     },[])
 
