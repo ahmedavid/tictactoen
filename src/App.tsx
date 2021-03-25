@@ -7,6 +7,9 @@ import { DB_STR, GameLogin } from './Login/GameLogin';
 import { Navbar } from './Login/Navbar';
 import { APIClient } from './utils/APIClient';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const apiClient = APIClient.getInstance()
 
 interface IAppState {
@@ -73,13 +76,14 @@ const App = () => {
   return (
     <Router>
       <Navbar loginData={{teamId:appState.teamId,userId: appState.userId}} checkLogin={handleCheckLogin}/>
+      <ToastContainer/>
       <div className="App">
         <Switch>
           <Route path="/game/:team1Id/:team2Id/:gameId">
             <GameDetail apiClient={apiClient}/>
           </Route>
           <Route path="/games">
-            <GameList apiClient={apiClient}/>
+            <GameList apiClient={apiClient} team={appState.teamId}/>
           </Route>
           <Route path="*" >
             <Redirect to="/games"/>

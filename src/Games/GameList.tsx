@@ -2,18 +2,16 @@ import React, { useEffect, useState } from 'react'
 import { trackPromise } from 'react-promise-tracker';
 import './GameList.css'
 import { useHistory } from 'react-router-dom';
-import { ILoginData } from '../Login/GameLogin';
 import { IGame,APIClient } from '../utils/APIClient';
 import { CreateGameForm } from './CreateGameForm';
 
 interface IProps {
     apiClient: APIClient
+    team: number
 }
 
-export const GameList = ({apiClient}: IProps) => {
+export const GameList = ({apiClient,team}: IProps) => {
     const history = useHistory();
-    const [showTeam,setShowTeam] = useState(true)
-    const [team,setTeam] = useState("HodriMeydan")
     const [gameList,setGameList] = useState<IGame[]>([])
 
     const getGameList = async () => {
@@ -23,7 +21,7 @@ export const GameList = ({apiClient}: IProps) => {
     }
 
     const createGame = async (team1Id:number, team2Id: number,boardSize: number, target: number) => {
-        await apiClient.createGame(team1Id,team2Id,boardSize,target)
+        await trackPromise(apiClient.createGame(team1Id,team2Id,boardSize,target))
         getGameList()
     }
 
@@ -53,42 +51,14 @@ export const GameList = ({apiClient}: IProps) => {
 
     useEffect(() => {
         getGameList()
-        // isLoggedIn().then((loginData) => {
-        //     if(loginData) {
-        //         console.log(loginData)
-        //         setLoginData(loginData)
-        //         getGameList()
-        //         console.log(loginData)
-        //     } else {
-        //         history.push('/game/login')
-        //         return
-        //     }
-        // }).catch(() => {
-        //     history.push('/game/login')
-        //     return
-        // })
-
     },[])
 
     return (
         <div className="game_list container">
-            {/* <h3 onDoubleClick={e => setShowTeam(false)} style={{display: showTeam ? 'inline-block' : 'none'}}>{team}</h3><span>  (MyTeam)</span> */}
-            <form onSubmit={e => {
-                e.preventDefault()
-                setShowTeam(true)
-            }} style={{display: showTeam ? 'none' : 'block'}}>
-                <div className="form-group">
-                    <input type="text" id="myTeam" className="form-control" value={team} onChange={e => setTeam(e.target.value)}/>
-                </div>
-            </form>
-
-            <CreateGameForm createGame={createGame} team1Id={1}/>
+            <CreateGameForm createGame={createGame} team1Id={team}/>
             <hr/>
             <h1>My Games</h1>
-
             {renderGameList()}
-
-
         </div>
     )
 }

@@ -50,7 +50,8 @@ const getBoard = async (gameId) => {
     return response.data
 }
 
-const createGame = async (teamId1,teamId2,boardSize) => {
+const createGame = async (teamId1,teamId2,boardSize,target) => {
+    console.log("Team1:",teamId1,"Team2:",teamId2)
     try {
         const params = new URLSearchParams()
         params.append('type', 'game')
@@ -58,6 +59,8 @@ const createGame = async (teamId1,teamId2,boardSize) => {
         params.append('teamId2', teamId2)
         params.append('gameType', 'TTT')
         params.append('boardSize', boardSize)
+        if(target)
+            params.append('target', target)
         const response = await axios.post(BASE_URL,params)
         return response.data
     } catch (error) {
@@ -110,12 +113,11 @@ app.get('/*', async (req,res) => {
 
 
 app.post('/creategame', async (req,res) => {
-    const boardSize = req.query['boardSize']
-    console.log("Board Size: ",boardSize)
-    const teamId1 = 1243
-    const teamId2 = 1246
-    const data = await createGame(teamId1,teamId2,boardSize)
-    // console.log(data)
+    const {team1Id,team2Id,boardSize,target} = req.body
+    // const boardSize = req.query['boardSize']
+    console.log("Board Size: ",team1Id,team2Id,boardSize,target)
+    const data = await createGame(team1Id,team2Id,boardSize,target)
+    console.log(data)
     res.json(data)
 })
 
