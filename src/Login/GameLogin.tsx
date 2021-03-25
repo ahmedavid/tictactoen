@@ -1,18 +1,21 @@
-import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom';
+import React, { useEffect, useState } from 'react'
 
 export const DB_STR = 'ttt_game_login'
 
 export interface ILoginData {
-    teamId: string
-    userId: string
+    teamId: number
+    userId: number
 }
 
 const INIT_LOGINDATA: ILoginData = {
-    teamId: "",
-    userId: ""
+    teamId: 0,
+    userId: 0
 }
 
+
+interface IProps {
+    checkLogin: () => void
+}
 
 
 const login = (userId:number, teamId: number) => {
@@ -32,65 +35,49 @@ const login = (userId:number, teamId: number) => {
     })
 }
 
-export const isLoggedIn = () => {
-    return new Promise<false|ILoginData>((res,rej) => {
-        const login_data = localStorage.getItem(DB_STR)
-        if(login_data) {
-            const parsed = JSON.parse(login_data)
-            if(parsed["teamId"] && parsed["userId"]) {
-                return res(parsed)
-            }
 
-        } 
-        return rej(false)
-    })
-}
 
-export const GameLogin = () => {
+export const GameLogin = ({checkLogin}:IProps) => {
     const [loginData,setLoginData] = useState<ILoginData>(INIT_LOGINDATA)
     const [canLogin,setCanLogin] = useState(false)
-    const history = useHistory()
-
-    
 
     const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        await login(parseInt(loginData.userId),parseInt(loginData.teamId))
-        if(isLoggedIn()){
-            setCanLogin(true)
-        }
+        await login(loginData.userId,loginData.teamId)
+        checkLogin()
     }
 
-
-    isLoggedIn()
-        .then(() => {
-            setCanLogin(true)
-        })
-        .catch(err => console.log("LOGIN ERROR: ",err))
-
-    if(canLogin) {
-        history.push('/game')
-    }
 
     return (
-        <div className="container">
+        <div className="container mt-4">
             <div className="row">
-                <div className="col-6 offset-3">
-                    <h1>Game Login</h1>
+                <div className="col-6 offset-3 text-center">
+                    <h1>TicTacToeN Login</h1>
                 </div>
             </div>
-            <hr/>
             <div className="row">
                 <div className="col-6 offset-3">
+                    <hr/>
                     <form onSubmit={e => handleSubmit(e)}>
                         <div className="form-group">
                             <label htmlFor="teamId">TeamID</label>
-                            <input id="teamId" className="form-control" type="text" placeholder="1243" value={loginData.teamId} onChange={e => setLoginData({...loginData,teamId:e.target.value})}/>
+                            <input 
+                                id="teamId" 
+                                className="form-control" 
+                                type="text" 
+                                placeholder="1243" 
+                                value={loginData.teamId === 0 ? "" : loginData.teamId } 
+                                onChange={e => setLoginData({...loginData,teamId: isNaN(parseInt(e.target.value)) ? 0 :  parseInt(e.target.value)})}/>
                         </div>
 
                         <div className="form-group">
                             <label htmlFor="userId">UserID</label>
-                            <input id="userId" className="form-control" type="text" placeholder="1046" value={loginData.userId} onChange={e => setLoginData({...loginData,userId:e.target.value})}/>
+                            <input 
+                                id="userId" 
+                                className="form-control" 
+                                type="text" placeholder="1046" 
+                                value={loginData.userId === 0 ? "" : loginData.userId } 
+                                onChange={e => setLoginData({...loginData,userId:isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value)})}/>
                         </div>
 
                         <button type="submit" className="btn btn-primary btn-block">Login</button>

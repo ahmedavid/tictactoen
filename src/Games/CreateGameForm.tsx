@@ -14,14 +14,14 @@ export const CreateGameForm = ({createGame, team1Id}: IProps) => {
     return (
         <form className="mt-8" onSubmit={e => {
             e.preventDefault()
-            const t2 = parseInt(team2Id)
-            if(t2)
-                createGame(team1Id,t2,currBoardSize,currTarget)
+            if(team2Id.length > 0)
+                createGame(team1Id,parseInt(team2Id),currBoardSize,currTarget)
         }}>
             <div>
                 <pre>
                         boardSize: {currBoardSize} <br/>
-                        target: {currTarget}
+                        target: {currTarget}<br/>
+                        team2: {team2Id}
                 </pre>
             </div>
             <div className="form-group">
@@ -31,7 +31,7 @@ export const CreateGameForm = ({createGame, team1Id}: IProps) => {
                     id="opponentTeam" 
                     className="form-control" 
                     placeholder="1234" 
-                    value={team2Id} 
+                    // value={team2Id} 
                     onChange={e => setTeam2Id(e.target.value)}
                 />
             </div>
@@ -46,9 +46,9 @@ export const CreateGameForm = ({createGame, team1Id}: IProps) => {
                         setCurrBoardSize(parseInt(e.target.value))
                         setCurrTarget(parseInt(e.target.value))
                     }}>
-                    <option value={6}>6</option>
-                    <option value={12}>12</option>
-                    <option value={20}>20</option>
+                    <option key={'bs' + 6} value={6}>6</option>
+                    <option value={'bs' + 12}>12</option>
+                    <option value={'bs' + 20}>20</option>
                 </select>
             </div>
 
@@ -62,7 +62,7 @@ export const CreateGameForm = ({createGame, team1Id}: IProps) => {
                         setCurrTarget(parseInt(e.target.value))
                     }}>
                     {
-                        Array.from(new Array(currBoardSize)).map((x,i) => <option value={currBoardSize-i}>{currBoardSize-i}</option>)
+                        Array.from(new Array(currBoardSize)).map((x,i) => <option key={'target' + (currBoardSize-i)} value={currBoardSize-i}>{currBoardSize-i}</option>)
                     }
                 </select>
             </div>

@@ -1,27 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import { DB_STR } from './GameLogin'
-import { useHistory } from 'react-router-dom';
+import { DB_STR, ILoginData } from './GameLogin'
 
-export const Navbar = () => {
-    const [teamId,setTeamId] = useState("TeamID")
-    const [userId,setUserId] = useState("UserID")
-    const history = useHistory()
+interface IProps {
+    loginData: ILoginData
+    checkLogin: () => void
+}
+
+export const Navbar = ({loginData, checkLogin}: IProps) => {
+
+    const {userId,teamId} = loginData
 
     const logout = () => {
-        localStorage.setItem(DB_STR, "")
-        setTeamId("")
-        setUserId("")
-        history.push('/game/login')
+        localStorage.removeItem(DB_STR)
+        checkLogin()
     }
-
-    useEffect(() => {
-        const data = localStorage.getItem(DB_STR)
-        if(data) {
-            const loginData = JSON.parse(data)
-            setTeamId(loginData['teamId'])
-            setUserId(loginData['userId'])
-        }
-    }, [teamId,userId])
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">

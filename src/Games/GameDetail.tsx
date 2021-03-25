@@ -22,6 +22,7 @@ interface ParamTypes {
 
 
 export const GameDetail = ({apiClient}: IProps) => {
+    const [autoRefresh,setAutoRefresh] = useState(true)
     const {team1Id,team2Id,gameId} = useParams<ParamTypes>()
     const [gameState,setGameState] = useState<IGameState|null>(null)
     const [nextPlayer,setNextPlayer] = useState(STARTING_PLAYER)
@@ -38,6 +39,7 @@ export const GameDetail = ({apiClient}: IProps) => {
     }
     
     const getBoard = async () => {
+        console.log("GETTING BOARD...")
         const boardState = await trackPromise(apiClient.getBoard(parseInt(gameId!)))
         game = Game.fromState(boardState as IGameState,receiveNextPlayer)
         const nextP = game.getNextPlayer()
@@ -66,12 +68,32 @@ export const GameDetail = ({apiClient}: IProps) => {
         }
     }
 
+    // const handleAutoRefresh = (e:React.ChangeEvent<HTMLInputElement>) => {
+    //     console.log("CHECKED: ",e.target.checked)
+    //     setAutoRefresh(e.target.checked)
+    // }
+
+
     useEffect(() => {
+        // let id:NodeJS.Timeout = setInterval(() => {
+        //     console.log("AUTOREFRESH IS: ", autoRefresh)
+        //     if(checkAutoRefresh()) {
+        //         getBoard()
+        //         console.log('REFRESHING...')
+        //     }
+        // }, 12000)
+
         getBoard()
+
+        // return () => clearInterval(id)
     },[])
     return (
         <div className="container">
-            <Link to="/game">Back</Link>
+            <Link to="/games">Back</Link>
+            {/* <div className="form-check form-switch">
+                <input className="form-check-input" type="checkbox" id="flexSwitchCheckDefault" defaultChecked={autoRefresh} onChange={handleAutoRefresh}/>
+                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Auto Refresh?</label>
+            </div> */}
             {
                 gameState && 
                 <TicTacToe move={makeMove} 

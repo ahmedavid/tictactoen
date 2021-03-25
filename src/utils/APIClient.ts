@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'react-toastify';
 
 export type IGame = {[key:string]: string}
 export interface APIResponse {
@@ -58,14 +59,29 @@ export class APIClient {
         return new APIClient()
     }
 
-    async createGame(teamId1:number, teamId2: number,boardSize:number, target: number) {
+    async createGame(team1Id:number, team2Id: number,boardSize:number, target: number) {
         try {
-            let mainPart = `${BASE_URL}creategame?teamId1=${teamId1}&teamId2=${teamId2}&boardSize=${boardSize}`
-            if(target) 
-                mainPart = `${mainPart}&target=${target}`
-            const response = await axios.post(mainPart)
+            const data = {
+                team1Id,
+                team2Id,
+                boardSize,
+                target
+            }
+            let mainPart = `${BASE_URL}creategame`
+            const response = await axios.post(mainPart,data)
+            if(response.data.code === "FAIL")
+                throw new Error(response.data)
             return response.data
         } catch (error) {
+            toast.error('Create Game Failed', {
+                position: "bottom-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                });
             console.log("ERROR:", error)            
         }
     }
@@ -74,7 +90,9 @@ export class APIClient {
         try {
             const response = await axios.get<IGameListResponse>(`${BASE_URL}gamelist`)
             console.log("Game List Success:", response)
-            return response.data.myGames
+            const games = response.data.myGames.slice()
+            games.sort((a,b) => parseInt(Object.keys(a)[0]) - parseInt(Object.keys(b)[0]))
+            return games
         } catch (error) {
             console.error("Error getting games")            
         }
