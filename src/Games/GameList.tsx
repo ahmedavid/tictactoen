@@ -10,10 +10,6 @@ interface IProps {
     apiClient: APIClient
 }
 
-
-// let team1Id = 1243
-// let team2Id = 1246
-
 export const GameList = ({apiClient}: IProps) => {
     const [loginData,setLoginData] = useState<ILoginData>({
         teamId: "",
@@ -44,12 +40,15 @@ export const GameList = ({apiClient}: IProps) => {
                     gameList.map((g,i) => {
                         const gameId = Object.keys(g)[0]
                         const data = g[gameId]
+                        const dataArr = data.split(":")
+                        const team1Id = dataArr[0]
+                        const team2Id = dataArr[1]
                         const isOpen = data.endsWith("O") 
                         return <li 
                                 style={{backgroundColor:isOpen ? "#28a745" :"#dc3545"}} 
                                 key={gameId+i} id={gameId} 
                                 className="list-group-item game_list_item" 
-                                onClick={e => history.push(`/game/${1}/${2}/${gameId}`)}>ID:{gameId} - {g[gameId]}</li>
+                                onClick={e => history.push(`/game/${team1Id}/${team2Id}/${gameId}`)}>ID:{gameId} - {g[gameId]}</li>
                     })
                 }
             </ul>
