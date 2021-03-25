@@ -50,7 +50,7 @@ public class Main {
             }
 
             //6. Get the new board state and make a move on behalf of the opponent
-            response = ApiHelper.GetMyMoves(gameId, 10);
+            response = ApiHelper.GetMyMoves(gameId, 400);
             byte[][] newState = ParseGameBoard(response);
 
             game = game.FromState(newState);
@@ -68,7 +68,8 @@ public class Main {
     public static boolean IsSuccess(BaseResponse response)
     {
         JsonObject jsonObject = gson.fromJson(response.ResponseBody, JsonObject.class);
-        return jsonObject.get("code").getAsString() == "OK";
+        String res = jsonObject.get("code").getAsString();
+        return res.equals("OK");
     }
 
     public static byte[][] ParseGameBoard(BaseResponse response)

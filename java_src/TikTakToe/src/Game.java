@@ -85,7 +85,11 @@ public class Game {
     }
 
     public byte[][] Result(byte[][] state, byte player, Action action) {
-        state[action.y][action.x] = player;
+        if(action != null)
+        {
+            state[action.y][action.x] = player;
+        }
+
         return state;
     }
 
@@ -137,13 +141,13 @@ public class Game {
 
     public Action[] Actions(byte[][] state) {
         int n = state.length;
-        Action[] actions = new Action[n];
+        Action[] actions = new Action[n * n];
         int actionIndex = 0;
 
         for(int i = 0; i < n; i++) {
             for(int j = 0; j < n; j++) {
                 if(state[i][j] == 0)
-                    actions[actionIndex] = new Action(j, i);
+                    actions[actionIndex++] = new Action(j, i);
             }
         }
 
