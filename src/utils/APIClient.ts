@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 export type IGame = {[key:string]: string}
@@ -68,7 +69,7 @@ export class APIClient {
                 target
             }
             let mainPart = `${BASE_URL}creategame`
-            const response = await axios.post(mainPart,data)
+            const response = await trackPromise(axios.post(mainPart,data))
             if(response.data.code === "FAIL")
                 throw new Error(response.data)
             return response.data
@@ -88,7 +89,7 @@ export class APIClient {
 
     async gameList(): Promise<IGame[]> {
         try {
-            const response = await axios.get<IGameListResponse>(`${BASE_URL}gamelist`)
+            const response = await trackPromise(axios.get<IGameListResponse>(`${BASE_URL}gamelist`))
             console.log("Game List Success:", response)
             const games = response.data.myGames.slice()
             games.sort((a,b) => parseInt(Object.keys(a)[0]) - parseInt(Object.keys(b)[0]))
@@ -101,7 +102,7 @@ export class APIClient {
 
     async getBoard(gameId: number) {
         try {
-            const response = await axios.get<IGameBoardResponse>(`${BASE_URL}board?gameId=${gameId}`)
+            const response = await trackPromise(axios.get<IGameBoardResponse>(`${BASE_URL}board?gameId=${gameId}`))
             console.log("Board Success:\n", response.data.output)
             return parseBoardString(response.data.output)
         } catch (error) {
@@ -114,7 +115,7 @@ export class APIClient {
         if(!this.isWorking) {
             this.isWorking = true
             try {
-                const response = await axios.post<IGameMoveResponse>(`${BASE_URL}move`,move)
+                const response = await trackPromise(axios.post<IGameMoveResponse>(`${BASE_URL}move`,move))
                 if(response.data.code === "FAIL") {
                     return -1
                 }

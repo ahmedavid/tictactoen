@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react'
-
 import { Link,useParams } from 'react-router-dom'
-import { trackPromise } from 'react-promise-tracker';
 import { APIClient, IMove } from '../utils/APIClient';
 import { Game, IGameState } from '../AI/Game';
 import { TicTacToe } from '../Board/TicTacToe';
 
 const STARTING_PLAYER = -1
+let mySymbol = -1
 
 let game: Game
 
 interface IProps {
-    apiClient: APIClient
+    apiClient: APIClient,
+    teamId: number
 }
 
 interface ParamTypes {
@@ -21,30 +21,37 @@ interface ParamTypes {
 }
 
 
-export const GameDetail = ({apiClient}: IProps) => {
-    const [autoRefresh,setAutoRefresh] = useState(true)
+export const GameDetail = ({apiClient, teamId}: IProps) => {
+    // const [autoRefresh,setAutoRefresh] = useState(true)
     const {team1Id,team2Id,gameId} = useParams<ParamTypes>()
     const [gameState,setGameState] = useState<IGameState|null>(null)
     const [nextPlayer,setNextPlayer] = useState(STARTING_PLAYER)
+    const [isMyTurn,setIsMyTurn] = useState(false)
 
     const requestAIMove = async (game: Game) => {
         return game.getBestMove()
     }
 
     const receiveNextPlayer = (next: number) => {
+        console.log("Receive next player: ", next)
         if(game) {
-            setNextPlayer(game.getNextPlayer())
+            const n = game.getNextPlayer()
+            setNextPlayer(n)
             setGameState(game.copyState(game.gameState))
         }
     }
     
     const getBoard = async () => {
         console.log("GETTING BOARD...")
-        const boardState = await trackPromise(apiClient.getBoard(parseInt(gameId!)))
+        const boardState = await apiClient.getBoard(parseInt(gameId!))
         game = Game.fromState(boardState as IGameState,receiveNextPlayer)
         const nextP = game.getNextPlayer()
         setNextPlayer(nextP)
         setGameState(game.copyState(game.gameState))
+    }
+
+    const refresh = () => {
+        getBoard()
     }
 
     const makeMove = async (x:number,y:number) => {
@@ -58,7 +65,7 @@ export const GameDetail = ({apiClient}: IProps) => {
             move: y+","+x
         }
         try {
-            const moveId = await trackPromise(apiClient.move(newMove))
+            const moveId = await apiClient.move(newMove)
             if(moveId > 0) {
                 getBoard()
             }
@@ -82,7 +89,11 @@ export const GameDetail = ({apiClient}: IProps) => {
         //         console.log('REFRESHING...')
         //     }
         // }, 12000)
-
+        if(teamId === parseInt(team1Id)) {
+            mySymbol = -1
+        } else if(teamId === parseInt(team2Id)) {
+            mySymbol = 1
+        }
         getBoard()
 
         // return () => clearInterval(id)
@@ -96,10 +107,13 @@ export const GameDetail = ({apiClient}: IProps) => {
             </div> */}
             {
                 gameState && 
-                <TicTacToe move={makeMove} 
-                gameState={gameState} 
-                nextPlayer={nextPlayer} 
-                requestAIMove={() => requestAIMove(game)}/>
+                <TicTacToe 
+                    move={makeMove} 
+                    gameState={gameState} 
+                    canPlay={nextPlayer === mySymbol}
+                    nextPlayer={nextPlayer} 
+                    refresh={refresh}
+                    requestAIMove={() => requestAIMove(game)}/>
             }
         </div>
     )

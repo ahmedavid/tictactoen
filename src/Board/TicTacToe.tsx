@@ -14,7 +14,9 @@ type IGameProps = {
     move: Function,
     gameState: IGameState,
     nextPlayer: number,
+    canPlay: boolean
     requestAIMove: () => Promise<IAction>
+    refresh: () => void
 }
 
 function getPosFromCoords(xCoord:number, yCoord: number,n:number) {
@@ -23,7 +25,15 @@ function getPosFromCoords(xCoord:number, yCoord: number,n:number) {
     return {x,y}
 }
 
-export const TicTacToe = ({move,gameState,nextPlayer,requestAIMove}: IGameProps) => {
+export const TicTacToe = (
+    {
+        canPlay,
+        move,
+        gameState,
+        nextPlayer,
+        requestAIMove,
+        refresh
+    }: IGameProps) => {
     // const [isAI,setIsAI] = useState(false)
     // const [isAIBusy,setIsAIBusy] = useState(false)
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -35,13 +45,14 @@ export const TicTacToe = ({move,gameState,nextPlayer,requestAIMove}: IGameProps)
 
     const handleAIMove = async () => {
         const {x,y} = await trackPromise(requestAIMove())
-        console.log("AI MOVE:" ,x,y)
+        console.log("AI Suggests:" ,x,y)
         move(x,y)
     }
 
     const handleClick = (e:MouseEvent,n: number) => {
         const {x,y} = getPosFromCoords(e.offsetX,e.offsetY,n)
-        move(x,y)
+        console.log("Mouse coord:", x,y)
+        //move(x,y)
     }
 
     const n = gameState!.length
@@ -91,8 +102,14 @@ export const TicTacToe = ({move,gameState,nextPlayer,requestAIMove}: IGameProps)
                 }></canvas>
             </div>
             <div className="spacer"></div>
-            <div>
-                <button className="btn btn-success btn-block" onClick={handleAIMove}>Request AI Move</button>
+            <div className="row">
+                <div className="col-6">
+                    <button className="btn btn-success btn-block" onClick={handleAIMove} disabled={!canPlay}>Agent</button>
+
+                </div>
+                <div className="col-6">
+                    <button className="btn btn-warning btn-block" onClick={refresh} >Refresh Board</button>
+                </div>
             </div>
         </div>
     )

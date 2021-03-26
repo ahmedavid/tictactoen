@@ -73,10 +73,6 @@ const gameList = async () => {
     return response.data
 }
 
-const makeMove = async (gameId, teamId,move) => {
-
-} 
-
 const PORT = process.env.PORT || 8080
 
 app.get('/game/id', async (req,res) => {
@@ -103,7 +99,7 @@ app.get('/board', async (req,res) => {
 
 app.get('/gamelist', async (req,res) => {
     const data = await gameList()
-    // console.log("GAME LIST: ", data)
+    console.log("GAME LIST: ", data.myGames.length)
     res.json(data)
 })
 
@@ -134,12 +130,14 @@ app.post('/move', async (req,res) => {
         const response = await axios.post(BASE_URL,params)
         // console.log(response.data)
 
-        if(response.data.code === "FAIL")
+        if(response.data.code === "FAIL") {
+            console.log("Move error: ",response.data)
             return res.json({code: "FAIL", moveId: -1})
+        }
         
         return res.json(response.data)
     } catch (error) {
-        console.log(error)  
+        console.log("Move error: ",error)  
         return res.json({code: "FAIL", moveId: -1})
     }
 })

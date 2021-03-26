@@ -7,12 +7,12 @@ export interface IAction {
 }
 
 export class Game {
-    isFinished = false
+    isGameOver = false
     gameState: IGameState = []
 
     actionUtilMap : {[key:string]: ICellState} = {}
 
-    setNextPlayer() {
+    determineNextPlayer() {
         const n = this.gameState.length
         let xCount = 0
         for(let i=0;i<n;i++) {
@@ -48,7 +48,7 @@ export class Game {
             }
         }
 
-        game.setNextPlayer()
+        game.determineNextPlayer()
         notify(game.getNextPlayer())
 
         return game
@@ -97,7 +97,7 @@ export class Game {
     }
 
     move(player:ICellState , {x,y}: IAction) {
-        if(this.isFinished)
+        if(this.isGameOver)
             return
         if(this.gameState[y][x] === 0) {
             this.gameState[y][x] = player
@@ -105,7 +105,7 @@ export class Game {
         }
 
         if(this.terminal(this.gameState)) {
-            this.isFinished = true
+            this.isGameOver = true
             const util = this.utility(this.gameState)
             console.log("FINISHED:", util)
 
@@ -126,8 +126,11 @@ export class Game {
     async getBestMove(): Promise<IAction> {
         return new Promise((res,rej) => {
             const n = this.gameState.length
-            const depth = n > 4 ? 4 : n
+            // const depth = n > 4 ? 4 : n
+            const depth = 3
+            console.log("Minimax Start")
             const bestMove = this.minimax(this.gameState,depth,-Infinity,Infinity,false)
+            console.log("Minimax End")
             return res(bestMove.action)
         })
     }

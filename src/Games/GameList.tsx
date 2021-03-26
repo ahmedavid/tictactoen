@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { trackPromise } from 'react-promise-tracker';
 import './GameList.css'
 import { useHistory } from 'react-router-dom';
 import { IGame,APIClient } from '../utils/APIClient';
@@ -15,13 +14,13 @@ export const GameList = ({apiClient,team}: IProps) => {
     const [gameList,setGameList] = useState<IGame[]>([])
 
     const getGameList = async () => {
-        let glist = await trackPromise(apiClient.gameList())
+        let glist = await apiClient.gameList()
         glist.reverse()
         setGameList(glist)
     }
 
     const createGame = async (team1Id:number, team2Id: number,boardSize: number, target: number) => {
-        await trackPromise(apiClient.createGame(team1Id,team2Id,boardSize,target))
+        await apiClient.createGame(team1Id,team2Id,boardSize,target)
         getGameList()
     }
 

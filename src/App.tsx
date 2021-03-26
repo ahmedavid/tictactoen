@@ -7,7 +7,7 @@ import { DB_STR, GameLogin } from './Login/GameLogin';
 import { Navbar } from './Login/Navbar';
 import { APIClient } from './utils/APIClient';
 
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const apiClient = APIClient.getInstance()
@@ -80,7 +80,7 @@ const App = () => {
       <div className="App">
         <Switch>
           <Route path="/game/:team1Id/:team2Id/:gameId">
-            <GameDetail apiClient={apiClient}/>
+            <GameDetail apiClient={apiClient} teamId={appState.teamId}/>
           </Route>
           <Route path="/games">
             <GameList apiClient={apiClient} team={appState.teamId}/>
