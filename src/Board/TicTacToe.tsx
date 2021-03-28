@@ -69,10 +69,10 @@ export const TicTacToe = (
                 const n = gameState.length
                 for(let y = 0;y<n;y++) {
                     for(let x = 0;x<n;x++) {
-                        if(gameState[y][x] === 1) {
+                        if(gameState[y][x] === -1) {
                             canvasRenderer.drawX(x,y)
                         }
-                        else if(gameState[y][x] === -1) {
+                        else if(gameState[y][x] === 1) {
                             canvasRenderer.drawO(x,y)
                         }
                     }
@@ -88,7 +88,7 @@ export const TicTacToe = (
             <div>
                 <h1 className="inline_header">TTT Viewer</h1>
             </div>
-            <PlayerIndicator player={nextPlayer === 1 ? "X" : "O"}/>
+            <PlayerIndicator player={nextPlayer === 1 ? "O" : "X"}/>
             <div className="spacer"></div>
             <div>
                 <canvas 

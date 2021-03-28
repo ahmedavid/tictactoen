@@ -16,6 +16,7 @@ export const GameList = ({apiClient,team}: IProps) => {
     const getGameList = async () => {
         let glist = await apiClient.gameList()
         glist.reverse()
+        glist = [{test:"test:test:test"}, ...glist]
         setGameList(glist)
     }
 

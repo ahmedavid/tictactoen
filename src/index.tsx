@@ -4,10 +4,14 @@ import './index.css';
 import App from './App';
 import { usePromiseTracker } from "react-promise-tracker";
 
+
 import {
   BrowserRouter as Router,
 } from "react-router-dom";
 import Loader from 'react-loader-spinner';
+
+
+console.warn = () => {}
 
 
  const LoadingIndicator = () => {

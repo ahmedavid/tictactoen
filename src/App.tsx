@@ -9,6 +9,7 @@ import { APIClient } from './utils/APIClient';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Test } from './Games/Test';
 
 const apiClient = APIClient.getInstance()
 
@@ -69,6 +70,10 @@ const App = () => {
     handleCheckLogin()
   },[])
 
+  // return (
+  //   <Test/>
+  // )
+
   if(!appState.isLoggedin) {
     return <GameLogin checkLogin={handleCheckLogin}/>
   }
@@ -79,6 +84,9 @@ const App = () => {
       <ToastContainer/>
       <div className="App">
         <Switch>
+          <Route exact path="game/test/test/test">
+            <GameDetail apiClient={apiClient} teamId={appState.teamId}/>
+          </Route>
           <Route path="/game/:team1Id/:team2Id/:gameId">
             <GameDetail apiClient={apiClient} teamId={appState.teamId}/>
           </Route>
