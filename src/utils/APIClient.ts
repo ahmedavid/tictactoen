@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
+import { ICellState } from '../AI/Game';
 
 export type IGame = {[key:string]: string}
 export interface APIResponse {
@@ -29,8 +30,8 @@ export interface IMove {
     moveY: number
 }
 
-const parseBoardString = (boardString: string) => {
-    const board: number[][] = []
+export const parseBoardString = (boardString: string): ICellState[][] => {
+    const board: ICellState[][] = []
     boardString.trim()
     let rows = boardString.split('\n')
     for(let i=0;i<rows.length-1;i++) {
@@ -38,9 +39,9 @@ const parseBoardString = (boardString: string) => {
         const symbols = rows[i].split('')
         for(let j=0;j<symbols.length;j++) {
             if(symbols[j] === 'X')
-                board[i].push(1)
-            else if(symbols[j] === 'O')
                 board[i].push(-1)
+            else if(symbols[j] === 'O')
+                board[i].push(1)
             else 
                 board[i].push(0)
         }
@@ -100,15 +101,25 @@ export class APIClient {
         return []
     }
 
-    async getBoard(gameId: number) {
+    async getBoard(gameId: number): Promise<{board: ICellState[][], target: number}> {
         try {
             const response = await trackPromise(axios.get<IGameBoardResponse>(`${BASE_URL}board?gameId=${gameId}`))
-            console.log("Board Success:\n", response.data.output)
-            return parseBoardString(response.data.output)
+            console.log("Board Success:\n", response.data.output, response.data.target)
+            if(response.data.code === "OK") {
+                console.log(response.data)
+                const parsed = parseBoardString(response.data.output)
+                return {
+                    board: parsed,
+                    target: response.data.target ? response.data.target :  parsed.length
+                }
+            }
         } catch (error) {
             console.error("Error getting board")            
         }
-        return []
+        return {
+            board: [],
+            target: 0
+        }
     } 
 
     async move (move: IMove): Promise<number> {

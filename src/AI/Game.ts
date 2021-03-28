@@ -1,9 +1,36 @@
+import PriorityQueue from "ts-priority-queue"
+
 export type ICellState = 0 | 1 | -1
+export type IPlayer = 1 | -1
 export type IGameState = ICellState[][]
+export type IScoredAction = {action:IAction,score:number}
+
+let count = 0
 
 export interface IAction {
     x: number
     y: number
+}
+
+function countMaxAdjacentSymbols(arr: Array<ICellState>, player: IPlayer) {
+    let maxCount = 0
+    let count = 0
+    const set = new Set(arr)
+    let full = !set.has(0) && set.size === 1
+
+    for(let i=0;i<arr.length;i++) {
+        if(arr[i] === -player) {
+            maxCount = Math.max(maxCount,count)
+            count = 0
+        } else if(arr[i] === player || arr[i] === 0) {
+            count = full ? count + 2*2 : count + 2
+            if(arr[i] === 0) {
+                count++
+            }
+        }
+    }
+
+    return maxCount = Math.max(maxCount,count)
 }
 
 export class Game {
@@ -17,7 +44,7 @@ export class Game {
         let xCount = 0
         for(let i=0;i<n;i++) {
             for(let j=0;j<n;j++) {
-                if(this.gameState[i][j] === 1)
+                if(this.gameState[i][j] === -1)
                     xCount++
             }
         }
@@ -25,23 +52,22 @@ export class Game {
         let oCount = 0
         for(let i=0;i<n;i++) {
             for(let j=0;j<n;j++) {
-                if(this.gameState[i][j] === -1)
+                if(this.gameState[i][j] === 1)
                     oCount++
             }
         }
 
 
         if(oCount === 0 || oCount === xCount) {
-            this.nextPlayer = -1
+            this.nextPlayer = 1
         }
         else {
-            this.nextPlayer = 1
+            this.nextPlayer = -1
         }
     }
 
-    static fromState(state: IGameState,notify: Function) {
-        const n = state.length
-        const game = new Game(n,-1,notify)
+    static fromState(state: IGameState,n:number,target: number, notify: Function) {
+        const game = new Game(n,target,1,notify)
         for(let i=0;i<n;i++) {
             for(let j=0;j<n;j++) {
                 game.gameState[i][j] = state[i][j]
@@ -54,7 +80,7 @@ export class Game {
         return game
     }
 
-    constructor(private n:number, private nextPlayer: ICellState, private notify: Function) {
+    private constructor(private n:number,private target: number, private nextPlayer: ICellState, private notify: Function) {
         this.initStateMatrix(n)
     }
 
@@ -90,13 +116,19 @@ export class Game {
         return newState
     }
 
-    result(state: IGameState,player: ICellState, action: IAction) {
+    applyAction(state: IGameState,player: ICellState, action: IAction) {
         const {x,y} = action
-        state[y][x] = player
+        state[x][y] = player
         return state
     }
 
-    move(player:ICellState , {x,y}: IAction) {
+    revertAction(state: IGameState, action: IAction) {
+        const {x,y} = action
+        state[x][y] = 0
+        return state
+    }
+
+    move(player:IPlayer , {x,y}: IAction) {
         if(this.isGameOver)
             return
         if(this.gameState[y][x] === 0) {
@@ -104,57 +136,59 @@ export class Game {
             this.toggleNextPlayer()
         }
 
-        if(this.terminal(this.gameState)) {
+        if(this.terminal(this.gameState,player,this.target)) {
             this.isGameOver = true
             const util = this.utility(this.gameState)
             console.log("FINISHED:", util)
 
             if(util === 1) {
-                console.log("WINNER X")
-            } else if(util === -1) {
                 console.log("WINNER O")
+            } else if(util === -1) {
+                console.log("WINNER X")
             } else {
                 console.log("DRAW")
             }
         }
     }
 
-    // render() {
-    //     this.renderer.renderBoard(this.gameState)
-    // }
-
-    async getBestMove(): Promise<IAction> {
+    async getBestMove(player: IPlayer): Promise<IAction> {
         return new Promise((res,rej) => {
             const n = this.gameState.length
-            // const depth = n > 4 ? 4 : n
-            const depth = 3
-            console.log("Minimax Start")
-            const bestMove = this.minimax(this.gameState,depth,-Infinity,Infinity,false)
-            console.log("Minimax End")
+            let depth = n*n
+            console.log("Minimax Start:", depth)
+            const bestMove = this.minimax(this.gameState,depth,-Infinity,Infinity,player,this.target)
+            console.log("Minimax End: Count : ",count)
             return res(bestMove.action)
         })
     }
 
-    minimax(state: IGameState,depth: number,alpha:number, beta: number, maxPlayer: boolean) {
-        if(depth === 0 || this.terminal(state)) {
-            return {util: this.utility(state), action:{x:-1,y:-1}}
+    minimax(state: IGameState,depth: number,alpha:number, beta: number, player: IPlayer,target: number) {
+        count++
+        const n = state.length
+        if(depth === 0 || this.terminal(state,player,target)) {
+            return {util: this.evaluate(state,player), action:{x:-1,y:-1}}
         }
 
-        if(maxPlayer) {
+        // Max player
+        if(player === 1) {
             let v = -Infinity
-            const actionsList = this.actions(state)
+            const agenda = this.actions(state,player)
+            // if(agenda.length === n*n) {
+            //     return {util: n*n, action: {x:0,y:0}}
+            // }
             let maxAction = {
                 util: -Infinity,
                 action: {x:-1,y:-1}
             }
-            for(const action of actionsList) {
-                const copyState =  this.copyState(state)
-                const newState = this.result(copyState,1,action)
-                const r = this.minimax(newState,depth-1,alpha,beta,false)
+            while(agenda.length !== 0) {
+                const {action} = agenda.dequeue()
+                const newState = this.applyAction(state,1,action)
+                const r = this.minimax(newState, depth-1, alpha, beta, -1, target)
+                this.revertAction(state,action)
                 v = Math.max(v, r.util)
-                alpha = Math.max(alpha,v)
+                alpha = Math.max(alpha, v)
                 if(alpha >= beta) {
-                    console.log("AB: ",alpha,beta)
+                    // console.log("AB: ",alpha,beta)
                     break
                 }
                 if(v > maxAction.util) {
@@ -166,23 +200,27 @@ export class Game {
         } 
         else {
             let v = Infinity
-            const actionsList = this.actions(state)
+            const agenda = this.actions(state,player)
             let minAction = {
                 util: Infinity,
                 action: {x:-1,y:-1}
             }
-            for(const action of actionsList) {
-                const copyState =  this.copyState(state)
-                const newState = this.result(copyState,-1,action)
-                const r = this.minimax(newState,depth-1,alpha,beta,true)
+            // if(agenda.length === n*n) {
+            //     return {util: n*n, action: {x:0,y:0}}
+            // }
+            while(agenda.length !== 0) {
+                const {action} = agenda.dequeue()
+                const newState = this.applyAction(state,-1,action)
+                const r = this.minimax(newState,depth-1,alpha,beta,1,target)
+                this.revertAction(state,action)
                 v = Math.min(v, r.util)
-                beta = Math.max(beta,v)
+                beta = Math.min(beta,v)
                 if(alpha >= beta) {
-                    console.log("AB: ",alpha,beta)
+                    // console.log("AB: ",alpha,beta)
                     break
                 }
                 if(v < minAction.util) {
-                    minAction.util = v
+                    minAction.util = -v
                     minAction.action = action
                 }
             }
@@ -234,25 +272,67 @@ export class Game {
         return 0
     }
 
-    terminal(state: IGameState) {
+    terminal(state: IGameState,player: IPlayer, target: number) {
         const util = this.utility(state)
-        if(this.actions(state).length === 0 || util !== 0) {
+        if(this.actions(state,player).length === 0 || util !== 0) {
             return true
         }
+        
+        // return false
+        // const player1Score = this.evaluate(state,1)
+        // const player2Score = this.evaluate(state,-1)
+        // if(this.actions(state,1).length === 0 || player1Score >= target || player2Score >= target)
+        //     return true
         
         return false
     }
 
-    actions(state: IGameState) {
+    actions(state: IGameState,player: IPlayer) {
         const n = state.length
-        const actions: IAction[] = []
+        const maxPQ = new PriorityQueue<IScoredAction>({comparator: (a,b) => b.score - a.score})
         for(let i=0;i<n;i++) {
             for(let j=0;j<n;j++) {
-                if(state[i][j] === 0)
-                    actions.push({x:j,y:i})
+                if(state[i][j] === 0) {
+                    const action = {x:i,y:j}
+                    const newState = this.applyAction(state,player,action)
+                    const score = this.evaluate(newState,player)
+                    maxPQ.queue({action,score})
+                    this.revertAction(state,action)
+                }
             }
         }
+        return maxPQ
+    }
 
-        return actions
+    // Position is preferable if current player has more symbols on any row,col or diagonal
+    // Score of the position is the max count of consequent symbols in a row, column and diagonal
+    evaluate(state: IGameState,player: IPlayer) {
+        const n = state.length
+        let maxRow = 0
+        let maxCol = 0
+        let diag1Arr: ICellState[] = []
+        let diag2Arr: ICellState[] = []
+        for(let row=0;row<n;row++) {
+            maxRow = Math.max(maxRow,countMaxAdjacentSymbols(state[row],player))
+            let colArr: ICellState[] = []
+            for(let col=0;col<n;col++) {
+                colArr.push(state[col][row])
+                // Diagonal 1
+                if(col === row) {
+                    diag1Arr.push(state[row][col])
+                }
+                // Diagonal 2
+                if(col + row === n - 1) {
+                    diag2Arr.push(state[row][col])
+                }
+            }
+            maxCol = Math.max(maxCol,countMaxAdjacentSymbols(colArr,player)) 
+        }
+
+        let diag1 = countMaxAdjacentSymbols(diag1Arr,player)
+        let diag2 = countMaxAdjacentSymbols(diag2Arr,player)
+
+        return Math.max(maxRow,maxCol,diag1,diag2)
+        //return maxRow + maxCol + diag1 +diag2
     }
 }

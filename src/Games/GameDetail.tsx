@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Link,useParams } from 'react-router-dom'
-import { APIClient, IMove } from '../utils/APIClient';
-import { Game, IGameState } from '../AI/Game';
+import { APIClient, IMove, parseBoardString } from '../utils/APIClient';
+import { Game, IGameState, IPlayer } from '../AI/Game';
 import { TicTacToe } from '../Board/TicTacToe';
 
-const STARTING_PLAYER = -1
-let mySymbol = -1
+const STARTING_PLAYER = 1
+let mySymbol = 1
 
 let game: Game
 
@@ -20,7 +20,6 @@ interface ParamTypes {
     gameId: string
 }
 
-
 export const GameDetail = ({apiClient, teamId}: IProps) => {
     // const [autoRefresh,setAutoRefresh] = useState(true)
     const {team1Id,team2Id,gameId} = useParams<ParamTypes>()
@@ -28,8 +27,14 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
     const [nextPlayer,setNextPlayer] = useState(STARTING_PLAYER)
     const [isMyTurn,setIsMyTurn] = useState(false)
 
+    const handleEvaluateBoard = (player: IPlayer) => {
+        const g = Game.fromState(gameState!,gameState!.length,gameState!.length,() => {})
+        const score = g.evaluate(gameState!,player)
+        console.log("Board Score for : ",player, score)
+    }
+
     const requestAIMove = async (game: Game) => {
-        return game.getBestMove()
+        return game.getBestMove(nextPlayer as IPlayer)
     }
 
     const receiveNextPlayer = (next: number) => {
@@ -39,12 +44,14 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
             setNextPlayer(n)
             setGameState(game.copyState(game.gameState))
         }
+
     }
     
     const getBoard = async () => {
         console.log("GETTING BOARD...")
-        const boardState = await apiClient.getBoard(parseInt(gameId!))
-        game = Game.fromState(boardState as IGameState,receiveNextPlayer)
+        const {board,target} = await apiClient.getBoard(parseInt(gameId!))
+        const n = board.length
+        game = Game.fromState(board,n,target,receiveNextPlayer)
         const nextP = game.getNextPlayer()
         setNextPlayer(nextP)
         setGameState(game.copyState(game.gameState))
@@ -59,10 +66,10 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
         const newMove:IMove = {
             moveX: x,
             moveY: y,
-            teamId: np === -1 ? team1Id : team2Id,
+            teamId: np === 1 ? team1Id : team2Id,
             gameId: parseInt(gameId),
-            symbol: np === 1 ? "X" : "O",
-            move: y+","+x
+            symbol: np === 1 ? "O" : "X",
+            move: x+","+y
         }
         try {
             const moveId = await apiClient.move(newMove)
@@ -89,18 +96,36 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
         //         console.log('REFRESHING...')
         //     }
         // }, 12000)
-        if(teamId === parseInt(team1Id)) {
-            mySymbol = -1
-        } else if(teamId === parseInt(team2Id)) {
-            mySymbol = 1
+        if(team1Id === "test") {
+            // const testBoardStr = "XXX---\n------\n------\n------\n------\n---O-\n"
+            // 4x4
+            // const testBoardStr = "XXXO\n---X\n---O\nXOOO\n"
+            const testBoardStr = "X--O-\nX----\nO---O\n---XO\nX----\n"
+            // const testBoardStr = "O--\n---\n--X\n"
+            // const testBoardStr = "---\n---\n---\n"
+            const target = 5
+            const parsed = parseBoardString(testBoardStr)
+            const n = parsed.length
+            game = Game.fromState(parsed,n,target,receiveNextPlayer)
+            const nextP = game.getNextPlayer()
+            setNextPlayer(nextP)
+            setGameState(game.copyState(game.gameState))
+        }else {
+            if(teamId === parseInt(team1Id)) {
+                mySymbol = 1
+            } else if(teamId === parseInt(team2Id)) {
+                mySymbol = -1
+            }
+            getBoard()
         }
-        getBoard()
 
         // return () => clearInterval(id)
     },[])
     return (
         <div className="container">
-            <Link to="/games">Back</Link>
+            <Link className="btn btn-primary" to="/games">Back</Link>
+            <button className="btn btn-success" onClick={() => handleEvaluateBoard(1)}>Evaluate For X</button>
+            <button className="btn btn-success" onClick={() => handleEvaluateBoard(-1)}>Evaluate For O</button>
             {/* <div className="form-check form-switch">
                 <input className="form-check-input" type="checkbox" id="flexSwitchCheckDefault" defaultChecked={autoRefresh} onChange={handleAutoRefresh}/>
                 <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Auto Refresh?</label>

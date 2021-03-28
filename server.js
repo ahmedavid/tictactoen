@@ -34,18 +34,20 @@ const getTeam = async () => {
     return response.data
 }
 
-const getGame = async (gameId) => {
-    // const response = await axios.get(`${BASE_URL}?type=moves&gameId=${gameId}&count=20`)
-    const response = await axios.get(`${BASE_URL}?type=moves&gameId=${gameId}`)
+// const getGame = async (gameId) => {
+//     // const response = await axios.get(`${BASE_URL}?type=moves&gameId=${gameId}&count=20`)
+//     const response = await axios.get(`${BASE_URL}?type=moves&gameId=${gameId}`)
 
-    return response.data
-}
+//     console.log("BOARD MAP: ", boardMapRes.data)
+//     console.log("BOARD STR: ", boardStringRes.data)
+
+//     return response.data
+// }
 
 const getBoard = async (gameId) => {
     setHeaders()
     const response = await axios.get(`${BASE_URL}?type=boardString&gameId=${gameId}`)
-
-    // console.log(response.data)
+    // const mapResponse = await axios.get(`${BASE_URL}?type=boardMap&gameId=${gameId}`)
 
     return response.data
 }
@@ -79,6 +81,7 @@ app.get('/game/id', async (req,res) => {
     const gameId = req.params[id]
     // const data = await getGame(1310)
     const data = await getGame(gameId)
+    console.log("game data: ", data)
     res.json(data)
 })
 
