@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { trackPromise } from 'react-promise-tracker'
-import { IAction, IGameState } from '../AI/Game'
+import { IAction, IGameState } from '../utils/interfaces'
 import { Canvas } from './Canvas'
 import { PlayerIndicator } from './PlayerIndicator'
 import './TicTacToe.css'
@@ -11,29 +11,30 @@ const CANVAS_HEIGHT = 600
 let canvas: HTMLCanvasElement | null
 
 type IGameProps = {
-    move: Function,
     gameState: IGameState,
     nextPlayer: number,
     canPlay: boolean
-    requestAIMove: () => Promise<IAction>
+    requestAIMove: () => Promise<void>
     refresh: () => void
+    sendDepth: (depth: number) => void
 }
 
 function getPosFromCoords(xCoord:number, yCoord: number,n:number) {
-    const x = Math.floor(xCoord / (CANVAS_WIDTH/n))
-    const y = Math.floor(yCoord / (CANVAS_WIDTH/n))
+    const y = Math.floor(xCoord / (CANVAS_WIDTH/n))
+    const x = Math.floor(yCoord / (CANVAS_WIDTH/n))
     return {x,y}
 }
 
 export const TicTacToe = (
     {
         canPlay,
-        move,
         gameState,
         nextPlayer,
         requestAIMove,
-        refresh
+        refresh,
+        sendDepth
     }: IGameProps) => {
+    const [depth,setDepth] = useState(6)
     // const [isAI,setIsAI] = useState(false)
     // const [isAIBusy,setIsAIBusy] = useState(false)
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -44,15 +45,12 @@ export const TicTacToe = (
     // }  
 
     const handleAIMove = async () => {
-        const {x,y} = await trackPromise(requestAIMove())
-        console.log("AI Suggests:" ,x,y)
-        move(x,y)
+        await trackPromise(requestAIMove())
     }
 
     const handleClick = (e:MouseEvent,n: number) => {
-        const {x,y} = getPosFromCoords(e.offsetX,e.offsetY,n)
-        console.log("Mouse coord:", x,y)
-        //move(x,y)
+        // const {x,y} = getPosFromCoords(e.offsetX,e.offsetY,n)
+        // move(x,y)
     }
 
     const n = gameState!.length
@@ -80,6 +78,7 @@ export const TicTacToe = (
             }
         
             renderGame(gameState)
+            sendDepth(depth)
         }
     },[gameState])
 
@@ -103,11 +102,21 @@ export const TicTacToe = (
             </div>
             <div className="spacer"></div>
             <div className="row">
-                <div className="col-6">
-                    <button className="btn btn-success btn-block" onClick={handleAIMove} disabled={!canPlay}>Agent</button>
-
+                <div className="col-4">
+                    <select name="depth" id="depth" value={depth} onChange={e => {
+                            const newDepth = parseInt(e.target.value)
+                            setDepth(newDepth)
+                            sendDepth(newDepth)
+                        }}>
+                            <option value={6}>6</option>
+                            <option value={12}>12</option>
+                            <option value={20}>20</option>
+                        </select>
                 </div>
-                <div className="col-6">
+                <div className="col-4">
+                    <button className="btn btn-success btn-block" onClick={handleAIMove} disabled={!canPlay}>Agent</button>
+                </div>
+                <div className="col-4">
                     <button className="btn btn-warning btn-block" onClick={refresh} >Refresh Board</button>
                 </div>
             </div>
