@@ -1,5 +1,4 @@
 import React from 'react'
-import { Game, IGameState } from '../AI/Game'
 
 // const state:IGameState = [
 //     [1,1,0,1,1],
@@ -9,13 +8,28 @@ import { Game, IGameState } from '../AI/Game'
 //     [0,0,1,0,0],
 // ]
 
-const state:IGameState = [
-    [1,1,0,1,1],
-    [1,1,1,1,0],
-    [1,0,1,0,0],
-    [0,1,1,1,0],
-    [1,0,1,0,1],
-]
+// const state:IGameState = [
+//     [1,1,0,1,1],
+//     [1,0,0,1,0],
+//     [1,0,1,0,0],
+//     [0,1,1,1,0],
+//     [1,0,1,0,1],
+// ]
+
+// const state: IGameState = [
+//     [ 1, 1, 0],
+//     [ 1,-1, 1],
+//     [ 0,-1, 0],
+// ]
+
+// const state: IGameState = [
+//     [ 1, 1, -1, 1],
+//     [ 1,-1,  0, 0],
+//     [ 0, 1,  0, 0],
+//     [ 0,-1,  0, 0],
+// ]
+
+// getBestMove(state,4,16,1)
 
 // const state:IGameState = [
 //     [1,1,0,1],

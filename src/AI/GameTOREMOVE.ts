@@ -1,32 +1,23 @@
 import PriorityQueue from "ts-priority-queue"
+import { IAction, ICellState, IGameState, IPlayer, IScoredAction } from "../utils/interfaces"
 
-export type ICellState = 0 | 1 | -1
-export type IPlayer = 1 | -1
-export type IGameState = ICellState[][]
-export type IScoredAction = {action:IAction,score:number}
+
 
 let count = 0
 
-export interface IAction {
-    x: number
-    y: number
-}
 
 function countMaxAdjacentSymbols(arr: Array<ICellState>, player: IPlayer) {
     let maxCount = 0
     let count = 0
-    const set = new Set(arr)
-    let full = !set.has(0) && set.size === 1
+    // const set = new Set(arr)
+    // let full = !set.has(0) && set.size === 1
 
     for(let i=0;i<arr.length;i++) {
-        if(arr[i] === -player) {
+        if(arr[i] === -player || arr[i] === 0) {
             maxCount = Math.max(maxCount,count)
             count = 0
-        } else if(arr[i] === player || arr[i] === 0) {
-            count = full ? count + 2*2 : count + 2
-            if(arr[i] === 0) {
-                count++
-            }
+        } else {
+            count++
         }
     }
 
@@ -138,7 +129,7 @@ export class Game {
 
         if(this.terminal(this.gameState,player,this.target)) {
             this.isGameOver = true
-            const util = this.utility(this.gameState)
+            const util = this.utility(this.gameState,this.target)
             console.log("FINISHED:", util)
 
             if(util === 1) {
@@ -151,10 +142,9 @@ export class Game {
         }
     }
 
-    async getBestMove(player: IPlayer): Promise<IAction> {
+    async getBestMove(player: IPlayer, depth: number): Promise<IAction> {
         return new Promise((res,rej) => {
             const n = this.gameState.length
-            let depth = n*n
             console.log("Minimax Start:", depth)
             const bestMove = this.minimax(this.gameState,depth,-Infinity,Infinity,player,this.target)
             console.log("Minimax End: Count : ",count)
@@ -166,7 +156,8 @@ export class Game {
         count++
         const n = state.length
         if(depth === 0 || this.terminal(state,player,target)) {
-            return {util: this.evaluate(state,player), action:{x:-1,y:-1}}
+            const util = this.utility(state,target)
+            return {util, action:{x:-1,y:-1}}
         }
 
         // Max player
@@ -187,13 +178,13 @@ export class Game {
                 this.revertAction(state,action)
                 v = Math.max(v, r.util)
                 alpha = Math.max(alpha, v)
-                if(alpha >= beta) {
-                    // console.log("AB: ",alpha,beta)
-                    break
-                }
                 if(v > maxAction.util) {
                     maxAction.util = v
                     maxAction.action = action
+                }
+                if(alpha >= beta) {
+                    // console.log("AB: ",alpha,beta)
+                    break
                 }
             }
             return maxAction
@@ -215,13 +206,13 @@ export class Game {
                 this.revertAction(state,action)
                 v = Math.min(v, r.util)
                 beta = Math.min(beta,v)
-                if(alpha >= beta) {
-                    // console.log("AB: ",alpha,beta)
-                    break
-                }
                 if(v < minAction.util) {
                     minAction.util = -v
                     minAction.action = action
+                }
+                if(alpha >= beta) {
+                    // console.log("AB: ",alpha,beta)
+                    break
                 }
             }
             return minAction
@@ -229,7 +220,7 @@ export class Game {
     }
 
     // Assume only called with a terminal state
-    utility(state: IGameState): number {
+    utility(state: IGameState, target: number): number {
         const n = state.length
         let rowSet = new Set<ICellState>()
         let colSet = new Set<ICellState>()
@@ -253,27 +244,27 @@ export class Game {
 
             // check rows
             if(rowSet.size === 1) {
-                return Array.from(rowSet)[0]
+                return Array.from(rowSet)[0] * target*target
             }
 
             //check cols
             if(colSet.size === 1) {
-                return Array.from(colSet)[0]
+                return Array.from(colSet)[0] * target*target
             }
         }
         // check diagonals
         if(diag1Set.size === 1) {
-            return Array.from(diag1Set)[0]
+            return Array.from(diag1Set)[0] * target*target
         }
         if(diag2Set.size === 1) {
-            return Array.from(diag2Set)[0]
+            return Array.from(diag2Set)[0] * target*target
         }
 
         return 0
     }
 
     terminal(state: IGameState,player: IPlayer, target: number) {
-        const util = this.utility(state)
+        const util = this.utility(state,target)
         if(this.actions(state,player).length === 0 || util !== 0) {
             return true
         }
@@ -332,7 +323,7 @@ export class Game {
         let diag1 = countMaxAdjacentSymbols(diag1Arr,player)
         let diag2 = countMaxAdjacentSymbols(diag2Arr,player)
 
-        return Math.max(maxRow,maxCol,diag1,diag2)
-        //return maxRow + maxCol + diag1 +diag2
+        // return Math.max(maxRow,maxCol,diag1,diag2)
+        return maxRow + maxCol + diag1 +diag2
     }
 }

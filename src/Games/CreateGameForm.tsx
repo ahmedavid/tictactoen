@@ -5,7 +5,7 @@ interface IProps {
     createGame: (teamId1: number, teamId2: number,boardSize: number, target: number) => void
 }
 
-const INITIAL_BOARDSIZE = 6
+const INITIAL_BOARDSIZE = 3
 
 export const CreateGameForm = ({createGame, team1Id}: IProps) => {
     const [team2Id, setTeam2Id] = useState("")
@@ -46,6 +46,9 @@ export const CreateGameForm = ({createGame, team1Id}: IProps) => {
                         setCurrBoardSize(parseInt(e.target.value))
                         setCurrTarget(parseInt(e.target.value))
                     }}>
+                    <option key={'bs' + 3} value={3}>3</option>
+                    <option key={'bs' + 4} value={4}>4</option>
+                    <option key={'bs' + 5} value={5}>5</option>
                     <option key={'bs' + 6} value={6}>6</option>
                     <option key={'bs' + 12} value={12}>12</option>
                     <option key={'bs' + 20} value={20}>20</option>

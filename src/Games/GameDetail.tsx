@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { Link,useParams } from 'react-router-dom'
-import { APIClient, IMove, parseBoardString } from '../utils/APIClient';
-import { Game, IGameState, IPlayer } from '../AI/Game';
-import { TicTacToe } from '../Board/TicTacToe';
+import { APIClient } from '../utils/APIClient';
+import { TicTacToe } from '../BoardUI/TicTacToe';
+import { IGameState, IMove, IPlayer } from '../utils/interfaces';
+import { Board } from '../Board/Board';
 
 const STARTING_PLAYER = 1
-let mySymbol = 1
+let mySymbol = STARTING_PLAYER
 
-let game: Game
+let board: Board
 
 interface IProps {
     apiClient: APIClient,
@@ -26,35 +27,38 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
     const [gameState,setGameState] = useState<IGameState|null>(null)
     const [nextPlayer,setNextPlayer] = useState(STARTING_PLAYER)
     const [isMyTurn,setIsMyTurn] = useState(false)
+    const [depth,setDepth] = useState(-1)
 
     const handleEvaluateBoard = (player: IPlayer) => {
-        const g = Game.fromState(gameState!,gameState!.length,gameState!.length,() => {})
-        const score = g.evaluate(gameState!,player)
-        console.log("Board Score for : ",player, score)
+        // const g = Game.fromState(gameState!,gameState!.length,gameState!.length,() => {})
+        // const score = g.evaluate(gameState!,player)
+        // console.log("Board Score for : ",player, score)
     }
 
-    const requestAIMove = async (game: Game) => {
-        return game.getBestMove(nextPlayer as IPlayer)
+    const requestAIMove = async () => {
+        const {x,y} = board.getBestMove(nextPlayer as IPlayer,4)
+        makeMove(x,y)
     }
 
     const receiveNextPlayer = (next: number) => {
         console.log("Receive next player: ", next)
-        if(game) {
-            const n = game.getNextPlayer()
-            setNextPlayer(n)
-            setGameState(game.copyState(game.gameState))
-        }
+        // if(game) {
+        //     const n = game.getNextPlayer()
+        //     setNextPlayer(n)
+        //     setGameState(game.copyState(game.gameState))
+        // }
 
     }
     
     const getBoard = async () => {
         console.log("GETTING BOARD...")
-        const {board,target} = await apiClient.getBoard(parseInt(gameId!))
-        const n = board.length
-        game = Game.fromState(board,n,target,receiveNextPlayer)
-        const nextP = game.getNextPlayer()
+        const {boardString,target} = await apiClient.getBoardString(parseInt(gameId!))
+        board = Board.fromBoardString(boardString,target)
+        const nextP = board.determineNextPlayer()
+        setGameState(board.getGameState())
         setNextPlayer(nextP)
-        setGameState(game.copyState(game.gameState))
+        // const n = board.length
+        // game = Game.fromState(board,n,target,receiveNextPlayer)
     }
 
     const refresh = () => {
@@ -62,7 +66,7 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
     }
 
     const makeMove = async (x:number,y:number) => {
-        const np = game.getNextPlayer()
+        const np = nextPlayer
         const newMove:IMove = {
             moveX: x,
             moveY: y,
@@ -82,34 +86,23 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
         }
     }
 
-    // const handleAutoRefresh = (e:React.ChangeEvent<HTMLInputElement>) => {
-    //     console.log("CHECKED: ",e.target.checked)
-    //     setAutoRefresh(e.target.checked)
-    // }
-
-
     useEffect(() => {
-        // let id:NodeJS.Timeout = setInterval(() => {
-        //     console.log("AUTOREFRESH IS: ", autoRefresh)
-        //     if(checkAutoRefresh()) {
-        //         getBoard()
-        //         console.log('REFRESHING...')
-        //     }
-        // }, 12000)
         if(team1Id === "test") {
             // const testBoardStr = "XXX---\n------\n------\n------\n------\n---O-\n"
             // 4x4
             // const testBoardStr = "XXXO\n---X\n---O\nXOOO\n"
             const testBoardStr = "X--O-\nX----\nO---O\n---XO\nX----\n"
+            const target = 5
             // const testBoardStr = "O--\n---\n--X\n"
             // const testBoardStr = "---\n---\n---\n"
-            const target = 5
-            const parsed = parseBoardString(testBoardStr)
-            const n = parsed.length
-            game = Game.fromState(parsed,n,target,receiveNextPlayer)
-            const nextP = game.getNextPlayer()
-            setNextPlayer(nextP)
-            setGameState(game.copyState(game.gameState))
+            // const parsed = parseBoardString(testBoardStr)
+            // const n = parsed.length
+            // game = Game.fromState(parsed,n,target,receiveNextPlayer)
+            // const nextP = game.getNextPlayer()
+            // agent = Agent.fromBoardString(testBoardStr,target)
+            // const nextP = agent.determineNextPlayer()
+            // setNextPlayer(nextP)
+            // setGameState(game.copyState(game.gameState))
         }else {
             if(teamId === parseInt(team1Id)) {
                 mySymbol = 1
@@ -126,19 +119,16 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
             <Link className="btn btn-primary" to="/games">Back</Link>
             <button className="btn btn-success" onClick={() => handleEvaluateBoard(1)}>Evaluate For X</button>
             <button className="btn btn-success" onClick={() => handleEvaluateBoard(-1)}>Evaluate For O</button>
-            {/* <div className="form-check form-switch">
-                <input className="form-check-input" type="checkbox" id="flexSwitchCheckDefault" defaultChecked={autoRefresh} onChange={handleAutoRefresh}/>
-                <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Auto Refresh?</label>
-            </div> */}
+            <div>Curr Depth: {depth}</div>
             {
                 gameState && 
                 <TicTacToe 
-                    move={makeMove} 
+                    sendDepth={depth => setDepth(depth)}
                     gameState={gameState} 
                     canPlay={nextPlayer === mySymbol}
                     nextPlayer={nextPlayer} 
                     refresh={refresh}
-                    requestAIMove={() => requestAIMove(game)}/>
+                    requestAIMove={() => requestAIMove()}/>
             }
         </div>
     )

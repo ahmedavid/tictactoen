@@ -1,4 +1,3 @@
-import { IGameState } from "../AI/Game"
 
 export class Canvas {
     constructor(
@@ -14,7 +13,7 @@ export class Canvas {
         this.ctx.fillRect(0,0,this.width,this.height)
     }
 
-    renderBoard(state: IGameState) {
+    renderBoard(state: number[][]) {
         this.drawBoard()
         //const n = this.width / this.rows
 
