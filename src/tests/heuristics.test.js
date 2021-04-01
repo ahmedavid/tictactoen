@@ -30,3 +30,52 @@ describe('3X3 X Wins, ', () => {
         assert.strictEqual(score,Number.MAX_VALUE*-1)
     })
 })
+
+describe('3X3 O Wins, Target 2', () => {
+    it('Score should be Number MAX VALUE', () => {
+        const state = [
+            [1,-1, 1],
+            [1,0, 0],
+            [0, 0, 0],
+        ]
+        const score = heuristic_evaluate(state,2)
+        assert.strictEqual(score,Number.MAX_VALUE)
+    })
+})
+
+describe('3X3 X Wins, Target 2', () => {
+    it('Score should be Number MAX VALUE', () => {
+        const state = [
+            [1,-1, 1],
+            [0,-1, 0],
+            [1, 0, 0],
+        ]
+        const score = heuristic_evaluate(state,2)
+        assert.strictEqual(score,Number.MAX_VALUE*-1)
+    })
+})
+
+
+describe('3X3 X Wins, Target 2', () => {
+    it('Score should be Number MAX VALUE', () => {
+        const state = [
+            [-1,0, 1],
+            [0,-1, 0],
+            [0, 0, 0],
+        ]
+        const score = heuristic_evaluate(state,2)
+        assert.strictEqual(score,Number.MAX_VALUE*-1)
+    })
+})
+
+// describe('3X3 X Wins, Target 2', () => {
+//     it('Score should be Number MAX VALUE', () => {
+//         const state = [
+//             [1,-1, 1],
+//             [0,0, -1],
+//             [0, 0, 0],
+//         ]
+//         const score = heuristic_evaluate(state,2)
+//         assert.strictEqual(score,Number.MAX_VALUE*-1)
+//     })
+// })

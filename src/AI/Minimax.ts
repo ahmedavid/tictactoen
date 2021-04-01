@@ -195,14 +195,16 @@ export function heuristic_evaluate(state: IGameState,target:number) {
 
 export function minimax(state: IGameState,n:number,target:number,depth: number,player: IPlayer,alpha:number,beta:number,action: IAction) {
     iterCount++
+    const evaluation = heuristic_evaluate(state,target)
     if(depth === 0) {
-        const evaluation = heuristic_evaluate(state,target)
         iterCount=0
         pruneCount = 0
         return {util:evaluation, action}
     }
+    
     const actions = getRemainingActions(state,player,target)
     const winner = gameWon(state,target)
+
     if(actions.length === 0 || winner) {
         // console.log("IterCount:", iterCount, "PruneCount:", pruneCount)
         iterCount=0
@@ -210,7 +212,7 @@ export function minimax(state: IGameState,n:number,target:number,depth: number,p
 
         let util = 0
         if(winner) {
-            util = (Math.pow(10,target) - depth)*winner
+            util = (evaluation - depth)*winner
         }
         // console.log("MINMAX DEPTH: ",depth)
         return {util,action}
