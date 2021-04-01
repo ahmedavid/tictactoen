@@ -197,7 +197,7 @@ export function minimax(state: IGameState,n:number,target:number,depth: number,p
     const actions = getRemainingActions(state,player)
     const winner = gameWon(state,target)
     if(actions.length === 0 || winner) {
-        console.log("IterCount:", iterCount, "PruneCount:", pruneCount)
+        // console.log("IterCount:", iterCount, "PruneCount:", pruneCount)
         iterCount=0
         pruneCount = 0
 
@@ -205,7 +205,7 @@ export function minimax(state: IGameState,n:number,target:number,depth: number,p
         if(winner) {
             util = (Math.pow(10,target) - depth)*winner
         }
-        console.log("MINMAX DEPTH: ",depth)
+        // console.log("MINMAX DEPTH: ",depth)
         return {util,action}
     }
 
