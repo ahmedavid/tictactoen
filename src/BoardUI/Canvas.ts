@@ -1,3 +1,4 @@
+import { getCoords } from "../utils/interfaces"
 
 export class Canvas {
     constructor(
@@ -13,23 +14,24 @@ export class Canvas {
         this.ctx.fillRect(0,0,this.width,this.height)
     }
 
-    renderBoard(state: number[][]) {
-        this.drawBoard()
-        //const n = this.width / this.rows
+    // renderBoard(state: number[]) {
+    //     this.drawBoard()
+    //     //const n = this.width / this.rows
+    //     const len = Math.floor(Math.sqrt(state.length))
 
-        // draw moves
-        for(let x=0;x<this.cols;x++) {
-            for(let y=0;y<this.rows;y++) {
-                if(state[y][x] === 1) {
-                    this.drawX(x,y)
-                }
-                else if(state[y][x] === -1) {
-                    this.drawO(x,y)
-                }
-            }
-        }
+    //     // draw moves
+    //     for(let index=0;index<state.length;index++) {
+    //         const {i,j} = getCoords(index,len)
+    //         debugger
+    //         if(state[index] === 1) {
+    //             this.drawX(i,j)
+    //         }
+    //         else if(state[index] === -1) {
+    //             this.drawO(i,j)
+    //         }
+    //     }
 
-    }
+    // }
 
     drawBoard() {
         const n = this.width / this.rows
@@ -47,30 +49,6 @@ export class Canvas {
         }
     }
 
-    drawTicTac(type: "tic" | "tac", xCoord:number, yCoord: number) {
-        const n = this.width / this.rows
-        const x = Math.floor(xCoord / n)
-        const y= Math.floor(yCoord / n)
-
-        // this.drawCircle(x,y)
-        if(type === "tic")
-            // this.drawCircle(x,y)
-            this.drawX(x,y)
-        else
-            this.drawO(x,y)
-    }
-
-    drawCircle(x:number, y:number) {
-        const n = this.width / this.rows
-        this.ctx.save()
-        this.ctx.strokeStyle = "green"
-        this.ctx.lineWidth = 8
-        this.ctx.beginPath()
-        this.ctx.arc(x*n  + n/2,y*n + n/2, 50,0,2 * Math.PI)
-        this.ctx.stroke()
-        this.ctx.restore()
-    }
-
     drawX(x:number, y:number) {
         const n = this.width / this.rows
         this.ctx.save()
@@ -78,7 +56,7 @@ export class Canvas {
         this.ctx.font = "52px Arial";
         this.ctx.textBaseline = "middle";
         this.ctx.textAlign = "center";
-        this.ctx.fillText("X",x*n + n/2,y*n+n/2)
+        this.ctx.fillText("X",y*n+n/2,x*n + n/2,)
         this.ctx.restore()
     }
 
@@ -89,24 +67,8 @@ export class Canvas {
         this.ctx.font = "52px Arial";
         this.ctx.textBaseline = "middle";
         this.ctx.textAlign = "center";
-        this.ctx.fillText("O",x*n + n/2,y*n + n/2)
+        this.ctx.fillText("O",y*n + n/2,x*n + n/2)
         this.ctx.restore()
     }
-
-//     drawCell(cell: ICell, color: string) {
-//         const {x,y} = cell
-//         this.ctx.fillStyle = WALL_COLOR
-//         this.ctx.strokeStyle = WALL_COLOR
-//         this.ctx.strokeRect(x*this.cellWidth,y*this.cellHeight,this.cellWidth,this.cellHeight)
-//         this.ctx.fillStyle = color
-//         this.ctx.fillRect(x*this.cellWidth,y*this.cellHeight,this.cellWidth,this.cellHeight)
-//     }
-
-//     drawGrid() {
-//         for(let i = 0; i < vertices.length; i++) {
-//             const cell = getSquarePos(vertices[i].squareID,this.cols)
-//             this.drawCell(cell,PATH_COLOR)
-//         }
-//     }
 }
 

@@ -27,7 +27,7 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
     const [gameState,setGameState] = useState<IGameState|null>(null)
     const [nextPlayer,setNextPlayer] = useState(STARTING_PLAYER)
     const [isMyTurn,setIsMyTurn] = useState(false)
-    const [depth,setDepth] = useState(-1)
+    const [depth,setDepth] = useState(20)
 
     const handleEvaluateBoard = (player: IPlayer) => {
         // const g = Game.fromState(gameState!,gameState!.length,gameState!.length,() => {})
@@ -36,8 +36,8 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
     }
 
     const requestAIMove = async () => {
-        const {x,y} = board.getBestMove(nextPlayer as IPlayer,4)
-        makeMove(x,y)
+        const {i,j} = board.getBestMove(nextPlayer as IPlayer,depth)
+        makeMove(i,j)
     }
 
     const receiveNextPlayer = (next: number) => {
@@ -65,16 +65,20 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
         getBoard()
     }
 
-    const makeMove = async (x:number,y:number) => {
+    const makeMove = async (i:number,j:number) => {
         const np = nextPlayer
         const newMove:IMove = {
-            moveX: x,
-            moveY: y,
+            moveX: i,
+            moveY: j,
             teamId: np === 1 ? team1Id : team2Id,
             gameId: parseInt(gameId),
             symbol: np === 1 ? "O" : "X",
-            move: x+","+y
+            move: i+","+j
         }
+        
+        if(gameId === "test") return
+        if(newMove.moveX < 0 || newMove.moveY < 0) return
+        
         try {
             const moveId = await apiClient.move(newMove)
             if(moveId > 0) {
@@ -88,21 +92,25 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
 
     useEffect(() => {
         if(team1Id === "test") {
-            // const testBoardStr = "XXX---\n------\n------\n------\n------\n---O-\n"
+            // const testBoardStr = "X-----\n-X-O--\n------\n------\n------\n---O--\n"
             // 4x4
-            // const testBoardStr = "XXXO\n---X\n---O\nXOOO\n"
-            const testBoardStr = "X--O-\nX----\nO---O\n---XO\nX----\n"
-            const target = 5
+            const testBoardStr = "OX--\n-OX-\n----\n----\n"
+            // const testBoardStr = "XXO\n--X\n-OO\n"
+            // const testBoardStr = "OX-\nOO-\nX-X\n"
+            // const testBoardStr = "X--O-\nX----\nO---O\n---XO\nX---\n"
+            const target = 4
             // const testBoardStr = "O--\n---\n--X\n"
             // const testBoardStr = "---\n---\n---\n"
             // const parsed = parseBoardString(testBoardStr)
             // const n = parsed.length
             // game = Game.fromState(parsed,n,target,receiveNextPlayer)
             // const nextP = game.getNextPlayer()
-            // agent = Agent.fromBoardString(testBoardStr,target)
-            // const nextP = agent.determineNextPlayer()
-            // setNextPlayer(nextP)
-            // setGameState(game.copyState(game.gameState))
+            board = Board.fromBoardString(testBoardStr,target)
+            const nextP = board.determineNextPlayer()
+            setNextPlayer(nextP)
+            const st = board.getGameState().slice()
+            console.log(st)
+            setGameState(st)
         }else {
             if(teamId === parseInt(team1Id)) {
                 mySymbol = 1
