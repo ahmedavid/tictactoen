@@ -1,6 +1,8 @@
 import PriorityQueue from "ts-priority-queue"
 import { IAction, ICellState, IGameState, IPlayer, IScoredAction } from "../utils/interfaces"
 
+const MAX = Number.MAX_VALUE
+
 function copyAndSort(state: IGameState) {
     let copied: IGameState = []
     for(let i=0;i<state.length;i++) {
@@ -10,7 +12,7 @@ function copyAndSort(state: IGameState) {
     let sorted: IGameState = []
 }
 
-function getRemainingActions(state: IGameState, player: IPlayer): PriorityQueue<IScoredAction> {
+function getRemainingActions(state: IGameState, player: IPlayer,target: number): PriorityQueue<IScoredAction> {
     const n = state.length
     let pq:PriorityQueue<IScoredAction>
     if(player === 1)
@@ -23,7 +25,7 @@ function getRemainingActions(state: IGameState, player: IPlayer): PriorityQueue<
             if(state[i][j] === 0) {
                 const action = {i,j}
                 applyAction(state,player,action)
-                const score = heuristic_evaluate(state)
+                const score = heuristic_evaluate(state,target)
                 pq.queue({action,score})
                 revertAction(state,action)
             }
@@ -126,11 +128,10 @@ function countMaxAdjacentSymbols(arr: Array<ICellState>, player: IPlayer) {
  * Evaluate position based on number of adjacent symbols in a row, col and diagonals
  * n in row 10^(n-1) points
  */
-export function heuristic_evaluate(state: IGameState) {
+export function heuristic_evaluate(state: IGameState,target:number) {
     let scoreO = 0
     let scoreX = 0
-    const len = state.length
-    const n = Math.sqrt(len)
+    const n = state.length
 
     let row: ICellState[] = []
     let col: ICellState[] = []
@@ -151,9 +152,12 @@ export function heuristic_evaluate(state: IGameState) {
         }
 
         const countO = countMaxAdjacentSymbols(row,1)
-        const countX = countMaxAdjacentSymbols(row,-1)
         const countOCol = countMaxAdjacentSymbols(col,1)
+        if(countO === target || countOCol === target) return MAX
+
+        const countX = countMaxAdjacentSymbols(row,-1)
         const countXCol = countMaxAdjacentSymbols(col,-1)
+        if(countX === target || countXCol === target) return -MAX
 
         row = []
         col = []
@@ -170,8 +174,11 @@ export function heuristic_evaluate(state: IGameState) {
 
     const countDiag1O = countMaxAdjacentSymbols(diag1,1)
     const countDiag2O = countMaxAdjacentSymbols(diag2,1)
+    if(countDiag1O === target || countDiag2O === target) return MAX
+
     const countDiag1X = countMaxAdjacentSymbols(diag1,1)
     const countDiag2X = countMaxAdjacentSymbols(diag2,1)
+    if(countDiag1X === target || countDiag2X === target) return -MAX
 
     if(countDiag1O > 0)
         scoreO += Math.pow(10,countDiag1O-1)
@@ -189,15 +196,15 @@ export function heuristic_evaluate(state: IGameState) {
 export function minimax(state: IGameState,n:number,target:number,depth: number,player: IPlayer,alpha:number,beta:number,action: IAction) {
     iterCount++
     if(depth === 0) {
-        const evaluation = heuristic_evaluate(state)
+        const evaluation = heuristic_evaluate(state,target)
         iterCount=0
         pruneCount = 0
         return {util:evaluation, action}
     }
-    const actions = getRemainingActions(state,player)
+    const actions = getRemainingActions(state,player,target)
     const winner = gameWon(state,target)
     if(actions.length === 0 || winner) {
-        console.log("IterCount:", iterCount, "PruneCount:", pruneCount)
+        // console.log("IterCount:", iterCount, "PruneCount:", pruneCount)
         iterCount=0
         pruneCount = 0
 
@@ -205,7 +212,7 @@ export function minimax(state: IGameState,n:number,target:number,depth: number,p
         if(winner) {
             util = (Math.pow(10,target) - depth)*winner
         }
-        console.log("MINMAX DEPTH: ",depth)
+        // console.log("MINMAX DEPTH: ",depth)
         return {util,action}
     }
 
