@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { trackPromise } from 'react-promise-tracker'
-import { IAction, IGameState } from '../utils/interfaces'
+import {  IGameState } from '../utils/interfaces'
 import { Canvas } from './Canvas'
 import { PlayerIndicator } from './PlayerIndicator'
 import './TicTacToe.css'
@@ -18,13 +18,6 @@ type IGameProps = {
     refresh: () => void
     sendDepth: (depth: number) => void
 }
-
-function getPosFromCoords(xCoord:number, yCoord: number,n:number) {
-    const y = Math.floor(xCoord / (CANVAS_WIDTH/n))
-    const x = Math.floor(yCoord / (CANVAS_WIDTH/n))
-    return {x,y}
-}
-
 export const TicTacToe = (
     {
         canPlay,
@@ -35,14 +28,7 @@ export const TicTacToe = (
         sendDepth
     }: IGameProps) => {
     const [depth,setDepth] = useState(6)
-    // const [isAI,setIsAI] = useState(false)
-    // const [isAIBusy,setIsAIBusy] = useState(false)
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    
-    // const aimove = (gameState: IGameState) => {
-    //     const {x,y} = game.getBestMove()
-    //     game.move(1,{x:y,y:x})
-    // }  
 
     const handleAIMove = async () => {
         await trackPromise(requestAIMove())
@@ -65,13 +51,13 @@ export const TicTacToe = (
         
             const renderGame = (gameState: IGameState) => {
                 const n = gameState.length
-                for(let y = 0;y<n;y++) {
-                    for(let x = 0;x<n;x++) {
-                        if(gameState[y][x] === -1) {
-                            canvasRenderer.drawX(x,y)
+                for(let row=0;row<n;row++) {
+                    for(let col=0;col<n;col++) {
+                        if(gameState[row][col] === 1) {
+                            canvasRenderer.drawO(row,col)
                         }
-                        else if(gameState[y][x] === 1) {
-                            canvasRenderer.drawO(x,y)
+                        if(gameState[row][col] === -1) {
+                            canvasRenderer.drawX(row,col)
                         }
                     }
                 }
@@ -109,6 +95,8 @@ export const TicTacToe = (
                             sendDepth(newDepth)
                         }}>
                             <option value={6}>6</option>
+                            <option value={8}>8</option>
+                            <option value={10}>10</option>
                             <option value={12}>12</option>
                             <option value={20}>20</option>
                         </select>

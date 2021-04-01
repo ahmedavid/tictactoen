@@ -1,8 +1,12 @@
 import { Agent } from "../AI/Agent"
-import { ICellState, IGameState, IPlayer } from "../utils/interfaces"
+import { IAction, ICellState, IGameState, IPlayer } from "../utils/interfaces"
+
+function access({i,j}: IAction,n: number) {
+    return n*i + j
+}
 
 const parseBoardString = (boardString: string): IGameState => {
-    const board: ICellState[][] = []
+    const board: IGameState = []
     boardString.trim()
     let rows = boardString.split('\n')
     for(let i=0;i<rows.length-1;i++) {
