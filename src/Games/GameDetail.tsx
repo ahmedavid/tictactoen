@@ -92,8 +92,13 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
 
     useEffect(() => {
         if(team1Id === "test") {
-            const testBoardStr = 'OXO\nOXO\nO--\n'
-            const target = 3
+            // const state = [
+            //     [1,0, -1],
+            //     [0,1, 0],
+            //     [0, 0, 0],
+            // ]
+            const testBoardStr = 'O-X\n-O-\n---\n'
+            const target = 2
             board = Board.fromBoardString(testBoardStr,target)
             const nextP = board.determineNextPlayer()
             setNextPlayer(nextP)

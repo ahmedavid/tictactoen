@@ -56,8 +56,8 @@ describe('3X3 X Wins, Target 2', () => {
 })
 
 
-describe('3X3 X Wins, Target 2', () => {
-    it('Score should be Number MAX VALUE', () => {
+describe('3X3 X Wins on Diagonal, Target 2', () => {
+    it('Score should be Number -MAX VALUE', () => {
         const state = [
             [-1,0, 1],
             [0,-1, 0],
@@ -68,14 +68,28 @@ describe('3X3 X Wins, Target 2', () => {
     })
 })
 
-// describe('3X3 X Wins, Target 2', () => {
-//     it('Score should be Number MAX VALUE', () => {
-//         const state = [
-//             [1,-1, 1],
-//             [0,0, -1],
-//             [0, 0, 0],
-//         ]
-//         const score = heuristic_evaluate(state,2)
-//         assert.strictEqual(score,Number.MAX_VALUE*-1)
-//     })
-// })
+describe('3X3 X Wins, Target 2', () => {
+    it('Score should be Number MAX VALUE', () => {
+        const state = [
+            [1,-1, 1],
+            [0,0, -1],
+            [0, 0, 0],
+        ]
+        const score = heuristic_evaluate(state,2)
+        assert.strictEqual(score,Number.MAX_VALUE*-1)
+    })
+})
+
+describe('4X4 X Wins, Target 2', () => {
+    it('Score should be Number -MAX VALUE', () => {
+        const state = [
+            [1,0, 0, 1],
+            [0,-1, 0, 0],
+            [0,0, -1, 0],
+            [0, 0, 0, 0],
+        ]
+        const score = heuristic_evaluate(state,2)
+        assert.strictEqual(score,Number.MAX_VALUE*-1)
+    })
+})
+

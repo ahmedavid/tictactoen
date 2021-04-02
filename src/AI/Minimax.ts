@@ -1,16 +1,8 @@
 import PriorityQueue from "ts-priority-queue"
+import { getDiagonals } from "../utils/helpers"
 import { IAction, ICellState, IGameState, IPlayer, IScoredAction } from "../utils/interfaces"
 
 const MAX = Number.MAX_VALUE
-
-function copyAndSort(state: IGameState) {
-    let copied: IGameState = []
-    for(let i=0;i<state.length;i++) {
-        copied.push([...state[i]])
-    }
-
-    let sorted: IGameState = []
-}
 
 function getRemainingActions(state: IGameState, player: IPlayer,target: number): PriorityQueue<IScoredAction> {
     const n = state.length
@@ -124,6 +116,10 @@ function countMaxAdjacentSymbols(arr: Array<ICellState>, player: IPlayer) {
     return maxCount = Math.max(maxCount,count)
 }
 
+function getScore(count:number) {
+    return count > 0 ? Math.pow(10,count-1) : 0
+}
+
 /**
  * Evaluate position based on number of adjacent symbols in a row, col and diagonals
  * n in row 10^(n-1) points
@@ -135,62 +131,46 @@ export function heuristic_evaluate(state: IGameState,target:number) {
 
     let row: ICellState[] = []
     let col: ICellState[] = []
-    let diag1: ICellState[] = []
-    let diag2: ICellState[] = []
 
     for(let i=0;i<n;i++) {
         for(let j=0;j<n;j++) {
             row.push(state[i][j])
             col.push(state[j][i])
-
-            if(i == j) {
-                diag1.push(state[i][j])
-            }
-            if(i + j === n - 1) {
-                diag2.push(state[i][j])
-            }
         }
 
         const countO = countMaxAdjacentSymbols(row,1)
         const countOCol = countMaxAdjacentSymbols(col,1)
-        if(countO === target || countOCol === target) return MAX
+        if(countO >= target || countOCol >= target) return MAX
 
         const countX = countMaxAdjacentSymbols(row,-1)
         const countXCol = countMaxAdjacentSymbols(col,-1)
-        if(countX === target || countXCol === target) return -MAX
+        if(countX >= target || countXCol >= target) return -MAX
 
         row = []
         col = []
 
-        if(countO > 0)
-            scoreO += Math.pow(10,countO-1)
-        if(countX > 0)
-            scoreX -= Math.pow(10,countX-1)        
-        if(countOCol > 0)
-            scoreO += Math.pow(10,countOCol-1)
-        if(countXCol > 0)
-            scoreX -= Math.pow(10,countXCol-1)
+        scoreO += getScore(countO) + getScore(countOCol)
+        scoreX += getScore(countX) + getScore(countXCol)        
     }
 
-    const countDiag1O = countMaxAdjacentSymbols(diag1,1)
-    const countDiag2O = countMaxAdjacentSymbols(diag2,1)
-    if(countDiag1O === target || countDiag2O === target) return MAX
+    const diagonals = getDiagonals(state)
+    let diagonalScoreO = 0
+    let diagonalScoreX = 0
 
-    const countDiag1X = countMaxAdjacentSymbols(diag1,1)
-    const countDiag2X = countMaxAdjacentSymbols(diag2,1)
-    if(countDiag1X === target || countDiag2X === target) return -MAX
+    for(const diagonal of diagonals) {
+        const countDiagO = countMaxAdjacentSymbols(diagonal,1)
+        if(countDiagO >= target) return MAX
+        const countDiagX = countMaxAdjacentSymbols(diagonal,-1)
+        if(countDiagX >= target) return -MAX
 
-    if(countDiag1O > 0)
-        scoreO += Math.pow(10,countDiag1O-1)
-    if(countDiag2O > 0)
-        scoreO += Math.pow(10,countDiag2O-1)
+        diagonalScoreO += getScore(countDiagO)
+        diagonalScoreX += getScore(countDiagX)
+    }
 
-    if(countDiag1X > 0)
-        scoreX -= Math.pow(10,countDiag1X-1)
-    if(countDiag2X > 0)
-        scoreX -= Math.pow(10,countDiag2X-1)
+    scoreO += diagonalScoreO
+    scoreX += diagonalScoreX
 
-    return scoreO + scoreX
+    return scoreO - scoreX
 }
 
 export function minimax(state: IGameState,n:number,target:number,depth: number,player: IPlayer,alpha:number,beta:number,action: IAction) {
