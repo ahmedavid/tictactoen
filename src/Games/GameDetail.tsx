@@ -83,13 +83,10 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
             mySymbol = -1
         }
         if(gameId === "test") {
-            // const state = [
-            //     [1,0, -1],
-            //     [0,1, 0],
-            //     [0, 0, 0],
-            // ]
-            const testBoardStr = 'O-X\n-O-\n---\n'
-            const target = 3
+            // const testBoardStr = 'OOX\nXOO\n-XX\n'
+            // const testBoardStr = 'O---\nX-O-\n-X--\n-XO-\n'
+            const testBoardStr = 'O----\nX--O-\n--X--\n--XO-\n--XO-\n'
+            const target = 5
             board = Board.fromBoardString(testBoardStr,target)
             const nextP = board.determineNextPlayer()
             console.log("NEXT PLAYER: ",nextP)
@@ -111,8 +108,8 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
     return (
         <div className="container">
             <Link className="btn btn-primary" to="/games">Back</Link>
-            <button className="btn btn-success" onClick={() => handleEvaluateBoard(1)}>Evaluate For X</button>
-            <button className="btn btn-success" onClick={() => handleEvaluateBoard(-1)}>Evaluate For O</button>
+            {/* <button className="btn btn-success" onClick={() => handleEvaluateBoard(1)}>Evaluate For X</button>
+            <button className="btn btn-success" onClick={() => handleEvaluateBoard(-1)}>Evaluate For O</button> */}
             <div>Curr Depth: {depth}</div>
             {
                 gameState && 

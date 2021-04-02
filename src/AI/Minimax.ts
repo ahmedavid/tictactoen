@@ -2,7 +2,7 @@ import PriorityQueue from "ts-priority-queue"
 import { getDiagonals } from "../utils/helpers"
 import { IAction, ICellState, IGameState, IPlayer, IScoredAction } from "../utils/interfaces"
 
-const MAX = 1000000
+
 
 function getRemainingActions(state: IGameState, player: IPlayer,target: number): PriorityQueue<IScoredAction> {
     const n = state.length
@@ -26,65 +26,36 @@ function getRemainingActions(state: IGameState, player: IPlayer,target: number):
 
     return pq
 }
+// [0,1,1,1,0,1,1,1,1]
+export function maxRepeatingCount(arr:ICellState[], player: IPlayer) {
+    let i = 0
+    let maxCount = 0
+    let count = 0
+    while(i < arr.length) {
+        if(arr[i] === player) {
+            count++
+        } else {
+            maxCount = Math.max(maxCount,count)
+            count = 0
+        }
+        i++
+    }
+    maxCount = Math.max(maxCount,count)
+
+    return maxCount
+}
 
 export function checkWinInArray(arr:ICellState[], target: number) {
-    let c1 = arr[0] === 1 ? 1 : 0 
-    let c2 = arr[0] === -1 ? 1 : 0 
-    for(let i=0;i<arr.length;i++) {
-        if(arr[i] === arr[i+1]) {
-            if(arr[i] === 1) {
-                c1++
-            }
-            if(arr[i] === -1) {
-                c2++
-            }
-            if(c1 >= target) {
-                return 1
-            }
-            if(c2 >= target)
-                return -1
-        } else {
-            c1 = 0
-            c2 = 0
-        }
-    }
+    const maxO = maxRepeatingCount(arr,1)
+    if(maxO >= target) return 1
+    const maxX = maxRepeatingCount(arr,-1)
+    if(maxX >= target) return -1
+
     return 0
 }
 
 export function gameWon(state: IGameState,target: number) {
-    const n = state.length
-    let rowWin = 0
-    let colWin = 0
-    const diag1:ICellState[] = []
-    const diag2:ICellState[] = []
-
-    for(let i=0;i<n;i++) {
-        const rowArr:ICellState[] = []
-        const colArr:ICellState[] = []
-        for(let j=0;j<n;j++) {
-            rowArr.push(state[i][j])
-            colArr.push(state[j][i])
-
-            if(i === j) {
-                diag1.push(state[i][j])
-            }
-            if(i + j === n - 1) {
-                diag2.push(state[i][j])
-            }
-        }
-
-        // check curr row for win
-        rowWin = checkWinInArray(rowArr,target)
-        // check curr col for win
-        colWin = checkWinInArray(colArr,target)
-
-        if(rowWin || colWin) return rowWin || colWin
-    }
-
-    const diag1Win = checkWinInArray(diag1,target)
-    const diag2Win = checkWinInArray(diag2,target)
-
-    return diag1Win || diag2Win
+    return 1
 }
 
 function applyAction(state: IGameState,player: ICellState, {i,j}: IAction) {
@@ -172,29 +143,34 @@ export function heuristic_evaluate(state: IGameState,target:number) {
     return scoreO - scoreX
 }
 
-export function minimax(state: IGameState,target:number,depth: number,player: IPlayer,alpha:number,beta:number) {
-    iterCount++
-    const evaluation = heuristic_evaluate(state,target)
-    if(depth === 0) {
-        iterCount=0
-        pruneCount = 0
-        return {util:evaluation, action:{i:-1,j:-1}}
-    }
+const MAX = Number.MAX_VALUE
+let start_depth = -1
+
+export function minimaxHelper(state: IGameState,target:number,depth: number,player: IPlayer) {
+    start_depth = depth
+    return minimax(state,target,depth,player,-Infinity,Infinity)
+}
+
+function minimax(state: IGameState,target:number,depth: number,player: IPlayer,alpha:number,beta:number) {
+    const score = heuristic_evaluate(state,target)
     
+    let winner = 0
+    if(score === MAX)
+        winner = 1
+    if(score === -MAX)
+        winner = -1
+
     const actions = getRemainingActions(state,player,target)
-    const winner = gameWon(state,target)
-
-    if(actions.length === 0 || winner) {
-        // console.log("IterCount:", iterCount, "PruneCount:", pruneCount)
-        iterCount=0
-        pruneCount = 0
-
-        let util = 0
-        if(winner) {
-            util = MAX*winner
-        }
-        // console.log("MINMAX DEPTH: ",depth)
-        return {util,action:{i:-1,j:-1}}
+    
+    if(depth === 0 || actions.length === 0 || winner) {
+        const penalty = start_depth - depth
+        if(winner || depth === 0) {
+            iterCount=0
+            pruneCount = 0
+            return {util:score < 0 ? score + penalty : score - penalty, action:{i:-1,j:-1}}
+        }     
+        
+        return {util:0, action:{i:-1,j:-1}}
     }
 
     // Max player
@@ -205,9 +181,6 @@ export function minimax(state: IGameState,target:number,depth: number,player: IP
         }
         while(actions.length !== 0) {
             const {action} = actions.dequeue()
-            // if(depth === 6) {
-            //     debugger
-            // }
             const newState = applyAction(state,player,action)
             const minEvaluation = minimax(newState, target, depth-1, -1, alpha, beta)
             revertAction(state,action)
@@ -234,9 +207,6 @@ export function minimax(state: IGameState,target:number,depth: number,player: IP
         }
         while(actions.length !== 0) {
             const {action,score} = actions.dequeue()
-            if(depth === 6 && action.i=== 2 && action.j === 2) {
-                debugger
-            }
             const newState = applyAction(state,player,action)
             const maxEvaluation = minimax(newState, target, depth-1, 1, alpha, beta)
             revertAction(state,action)

@@ -1,5 +1,5 @@
 import { IGameState, IPlayer } from "../utils/interfaces"
-import { minimax } from "./Minimax"
+import { minimaxHelper } from "./Minimax"
 
 export class Agent {
 
@@ -7,11 +7,8 @@ export class Agent {
 
     getBestMove(state: IGameState,target:number,depth: number,player: IPlayer) {
         console.log("START minimax depth: ", depth)
-        const best = minimax(state,target,depth,player,-Infinity,Infinity)
+        const best = minimaxHelper(state,target,depth,player)
         console.log("Minimax Finish BEST:", best.action,"UTIL: ",best.util)
         return best.action
-        // console.log("Itercount:", iterCount)
-        // console.log("PruneCount:", pruneCount)
-        // console.log("AllWins:", allWins)
     }
 }
