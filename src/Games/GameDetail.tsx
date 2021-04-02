@@ -83,10 +83,11 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
             mySymbol = -1
         }
         if(gameId === "test") {
+            const testBoardStr = '-OX\n---\n---\n'
             // const testBoardStr = 'OOX\nXOO\n-XX\n'
             // const testBoardStr = 'O---\nX-O-\n-X--\n-XO-\n'
-            const testBoardStr = 'O----\nX--O-\n--X--\n--XO-\n--XO-\n'
-            const target = 5
+            // const testBoardStr = 'O----\nX--O-\n--X--\n--XO-\n--XO-\n'
+            const target = 3
             board = Board.fromBoardString(testBoardStr,target)
             const nextP = board.determineNextPlayer()
             console.log("NEXT PLAYER: ",nextP)

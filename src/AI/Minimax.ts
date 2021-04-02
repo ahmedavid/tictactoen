@@ -148,6 +148,13 @@ let start_depth = -1
 
 export function minimaxHelper(state: IGameState,target:number,depth: number,player: IPlayer) {
     start_depth = depth
+    const actions = getRemainingActions(state,player,target)
+    const n = state.length * state.length
+    if(n === actions.length) {
+        console.log('First move play top left')
+        return {util:0,action:{i:0,j:0}}
+    }
+    
     return minimax(state,target,depth,player,-Infinity,Infinity)
 }
 
