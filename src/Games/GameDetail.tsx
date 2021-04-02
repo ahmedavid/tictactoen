@@ -22,11 +22,9 @@ interface ParamTypes {
 }
 
 export const GameDetail = ({apiClient, teamId}: IProps) => {
-    // const [autoRefresh,setAutoRefresh] = useState(true)
     const {team1Id,team2Id,gameId} = useParams<ParamTypes>()
     const [gameState,setGameState] = useState<IGameState|null>(null)
     const [nextPlayer,setNextPlayer] = useState(STARTING_PLAYER)
-    const [isMyTurn,setIsMyTurn] = useState(false)
     const [depth,setDepth] = useState(20)
 
     const handleEvaluateBoard = (player: IPlayer) => {
@@ -39,16 +37,6 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
         const {i,j} = board.getBestMove(nextPlayer as IPlayer,depth)
         makeMove(i,j)
     }
-
-    const receiveNextPlayer = (next: number) => {
-        console.log("Receive next player: ", next)
-        // if(game) {
-        //     const n = game.getNextPlayer()
-        //     setNextPlayer(n)
-        //     setGameState(game.copyState(game.gameState))
-        // }
-
-    }
     
     const getBoard = async () => {
         console.log("GETTING BOARD...")
@@ -57,8 +45,6 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
         const nextP = board.determineNextPlayer()
         setGameState(board.getGameState())
         setNextPlayer(nextP)
-        // const n = board.length
-        // game = Game.fromState(board,n,target,receiveNextPlayer)
     }
 
     const refresh = () => {
@@ -91,16 +77,22 @@ export const GameDetail = ({apiClient, teamId}: IProps) => {
     }
 
     useEffect(() => {
-        if(team1Id === "test") {
+        if(teamId === parseInt(team1Id)) {
+            mySymbol = 1
+        } else if(teamId === parseInt(team2Id)) {
+            mySymbol = -1
+        }
+        if(gameId === "test") {
             // const state = [
             //     [1,0, -1],
             //     [0,1, 0],
             //     [0, 0, 0],
             // ]
             const testBoardStr = 'O-X\n-O-\n---\n'
-            const target = 2
+            const target = 3
             board = Board.fromBoardString(testBoardStr,target)
             const nextP = board.determineNextPlayer()
+            console.log("NEXT PLAYER: ",nextP)
             setNextPlayer(nextP)
             const st = board.getGameState().slice()
             console.log(st)

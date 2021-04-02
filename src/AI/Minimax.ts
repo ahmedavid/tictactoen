@@ -2,15 +2,15 @@ import PriorityQueue from "ts-priority-queue"
 import { getDiagonals } from "../utils/helpers"
 import { IAction, ICellState, IGameState, IPlayer, IScoredAction } from "../utils/interfaces"
 
-const MAX = Number.MAX_VALUE
+const MAX = 1000000
 
 function getRemainingActions(state: IGameState, player: IPlayer,target: number): PriorityQueue<IScoredAction> {
     const n = state.length
     let pq:PriorityQueue<IScoredAction>
     if(player === 1)
-        pq = new PriorityQueue<IScoredAction>({comparator: (a,b) => a.score - b.score})
-    else {
         pq = new PriorityQueue<IScoredAction>({comparator: (a,b) => b.score - a.score})
+    else {
+        pq = new PriorityQueue<IScoredAction>({comparator: (a,b) => a.score - b.score})
     }
     for(let i=0;i<n;i++) {
         for(let j=0;j<n;j++) {
@@ -153,11 +153,10 @@ export function heuristic_evaluate(state: IGameState,target:number) {
         scoreX += getScore(countX) + getScore(countXCol)        
     }
 
-    const diagonals = getDiagonals(state)
     let diagonalScoreO = 0
     let diagonalScoreX = 0
 
-    for(const diagonal of diagonals) {
+    for(const diagonal of getDiagonals(state)) {
         const countDiagO = countMaxAdjacentSymbols(diagonal,1)
         if(countDiagO >= target) return MAX
         const countDiagX = countMaxAdjacentSymbols(diagonal,-1)
@@ -173,13 +172,13 @@ export function heuristic_evaluate(state: IGameState,target:number) {
     return scoreO - scoreX
 }
 
-export function minimax(state: IGameState,n:number,target:number,depth: number,player: IPlayer,alpha:number,beta:number,action: IAction) {
+export function minimax(state: IGameState,target:number,depth: number,player: IPlayer,alpha:number,beta:number) {
     iterCount++
     const evaluation = heuristic_evaluate(state,target)
     if(depth === 0) {
         iterCount=0
         pruneCount = 0
-        return {util:evaluation, action}
+        return {util:evaluation, action:{i:-1,j:-1}}
     }
     
     const actions = getRemainingActions(state,player,target)
@@ -192,10 +191,10 @@ export function minimax(state: IGameState,n:number,target:number,depth: number,p
 
         let util = 0
         if(winner) {
-            util = (evaluation - depth)*winner
+            util = MAX*winner
         }
         // console.log("MINMAX DEPTH: ",depth)
-        return {util,action}
+        return {util,action:{i:-1,j:-1}}
     }
 
     // Max player
@@ -206,8 +205,11 @@ export function minimax(state: IGameState,n:number,target:number,depth: number,p
         }
         while(actions.length !== 0) {
             const {action} = actions.dequeue()
+            // if(depth === 6) {
+            //     debugger
+            // }
             const newState = applyAction(state,player,action)
-            const minEvaluation = minimax(newState,n, target, depth-1, -1, alpha, beta,action)
+            const minEvaluation = minimax(newState, target, depth-1, -1, alpha, beta)
             revertAction(state,action)
             if(minEvaluation.util > maxAction.util) {
                 maxAction.util = minEvaluation.util
@@ -231,9 +233,12 @@ export function minimax(state: IGameState,n:number,target:number,depth: number,p
             action: {i:-1,j:-1}
         }
         while(actions.length !== 0) {
-            const {action} = actions.dequeue()
+            const {action,score} = actions.dequeue()
+            if(depth === 6 && action.i=== 2 && action.j === 2) {
+                debugger
+            }
             const newState = applyAction(state,player,action)
-            const maxEvaluation = minimax(newState,n, target, depth-1, 1, alpha, beta,action)
+            const maxEvaluation = minimax(newState, target, depth-1, 1, alpha, beta)
             revertAction(state,action)
             if(maxEvaluation.util < minAction.util) {
                 minAction.util = maxEvaluation.util
