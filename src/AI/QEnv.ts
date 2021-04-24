@@ -38,7 +38,6 @@ export class QEnv {
         if(obj.world.length === 0) {
             this.world = makeMatrix(40)
             this.q = makeMatrix(40*40)
-            this.persist()
         } else {
             this.world = obj.world.slice()
             this.q = obj.q.slice()

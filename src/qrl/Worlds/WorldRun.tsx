@@ -99,7 +99,6 @@ export const WorldRun = ({apiClient,teamId}:IProps) => {
         // apiClient.getRuns().then(r => console.log(r))
         return () => {
             clearInterval(timeId)
-            qEnv.onDestroy()
             renderer.clearBoard()
         }
     }, [])

@@ -4,7 +4,7 @@ const bodyParser = require('body-parser')
 const express = require('express')
 const cors = require('cors')
 const { getData,enterWorld,agentMove } = require('./server_files/qrl')
-const { writeFileSync,readFileSync } = require('fs')
+const { writeFileSync,readFileSync,existsSync } = require('fs')
 const { json } = require('body-parser')
 const app = express()
 
@@ -99,8 +99,11 @@ const PORT = process.env.PORT || 8080
 app.get('/qrl/getworld', async (req,res) => {
     const worldName = req.query['worldName']
     const fileName = path.join(__dirname + '/server_files/worlds/'+worldName+'.txt')
-    const file = readFileSync(fileName,'utf-8')
-    return res.json({code:'OK',data:file})
+    if(existsSync(fileName)) {
+        const file = readFileSync(fileName,'utf-8')
+        return res.json({code:'OK',data:file})
+    }
+    return res.json({code:'OK',data:JSON.stringify({q:[],world:[]})})
 })
 
 app.post('/qrl/saveworld', async (req,res) => {
