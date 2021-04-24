@@ -92,7 +92,7 @@ const PORT = process.env.PORT || 8080
 app.get('/qrl/getworld', async (req,res) => {
     const worldName = req.query['worldName']
     const fileName = path.join(__dirname + '/server_files/worlds/'+worldName)
-    if(false && existsSync(fileName)) {
+    if(existsSync(fileName)) {
         const file = readFileSync(fileName,'utf-8')
         return res.json({code:'OK',data:file})
     }

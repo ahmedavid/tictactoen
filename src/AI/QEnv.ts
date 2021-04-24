@@ -34,15 +34,19 @@ export class QEnv {
     }
 
     async init() {
-        const obj = await this.retrieve()
-        if(obj.world.length === 0) {
+        try {
+            const obj = await this.retrieve()
+            if(obj.world.length === 0) {
+                this.world = makeMatrix(40)
+                this.q = makeMatrix(40*40)
+            } else {
+                this.world = obj.world.slice()
+                this.q = obj.q.slice()
+            }
+            
+        } catch (error) {
             this.world = makeMatrix(40)
             this.q = makeMatrix(40*40)
-        } else {
-            const bytes = new TextEncoder().encode(JSON.stringify(obj))
-            const blob = new Blob([bytes])
-            this.world = obj.world.slice()
-            this.q = obj.q.slice()
         }
         this.drawRewards()
     }
