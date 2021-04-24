@@ -5,11 +5,13 @@ const express = require('express')
 const cors = require('cors')
 const { getData,enterWorld,agentMove } = require('./server_files/qrl')
 const { writeFileSync,readFileSync,existsSync } = require('fs')
-const { json } = require('body-parser')
+const multer = require('multer')
+const upload = multer()
 const app = express()
 
 app.use(bodyParser({limit: '50mb',extended: true}))
 app.use('/',express.static(path.join(__dirname,'build')))
+app.use('/worlds',express.static(path.join(__dirname,'server_files/worlds')))
 app.use(bodyParser.json())
 app.use(cors())
 
@@ -86,27 +88,30 @@ const PORT = process.env.PORT || 8080
 
 
 
-
-
-
-
-
-
-
-
-
 // QRL Routes
 app.get('/qrl/getworld', async (req,res) => {
     const worldName = req.query['worldName']
-    const fileName = path.join(__dirname + '/server_files/worlds/'+worldName+'.txt')
-    if(existsSync(fileName)) {
+    const fileName = path.join(__dirname + '/server_files/worlds/'+worldName)
+    if(false && existsSync(fileName)) {
         const file = readFileSync(fileName,'utf-8')
         return res.json({code:'OK',data:file})
     }
-    return res.json({code:'OK',data:JSON.stringify({q:[],world:[]})})
+    return res.json({code:'OK',data:null})
 })
 
-app.post('/qrl/saveworld', async (req,res) => {
+app.post('/qrl/uploadworld',upload.any() ,(req,res) => {
+    const worldName = req.files[0].originalname
+    const buffer = req.files[0].buffer
+    const fileName = path.join(__dirname + '/server_files/worlds/'+worldName)
+    try {
+        writeFileSync(fileName,buffer)
+        res.json({code: "OK"})
+    } catch (error) {
+        res.json({code: "FAIL"})
+    }
+})
+
+app.post('/qrl/saveworld',(req,res) => {
     const {worldName,data} = req.body
     const fileName = path.join(__dirname + '/server_files/worlds/'+worldName+'.txt')
     const str = JSON.stringify(data)

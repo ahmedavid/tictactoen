@@ -205,33 +205,52 @@ export class APIClient {
         }
     }
 
-    async saveWorld(worldName:string, data: any) {
-        const body = {
-            worldName,
-            data
-        }
-
+    async uploadWorld(formData:FormData) {
         try {
-            const response = await trackPromise(axios.post<IMoveStatus>(`${BASE_URL}qrl/saveworld`, body))
-            if(response.data.code === "OK") {
-                console.log("Save world Success:\n", response.data)
-                return data
-            }
-            throw new Error(response.data.message)
+            const response = await trackPromise(axios.post<APIResponse>(`${BASE_URL}qrl/uploadworld`, formData, 
+            {headers:{'Content-Type': 'multipart/form-data'}}
+            ))
+            toast.success("World Persisted", {
+                position: "bottom-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                }); 
         } catch (error) {
-            console.error(error)            
+            console.log(error)
         }
     }
+
+    // async saveWorld(worldName:string, data: any) {
+    //     const body = {
+    //         worldName,
+    //         data
+    //     }
+
+    //     try {
+    //         const response = await trackPromise(axios.post<IMoveStatus>(`${BASE_URL}qrl/saveworld`, body))
+    //         if(response.data.code === "OK") {
+    //             console.log("Save world Success:\n", response.data)
+    //             return data
+    //         }
+    //         throw new Error(response.data.message)
+    //     } catch (error) {
+    //         console.error(error)            
+    //     }
+    // }
 
     async getWorld(worldName:string) {
 
         try {
-            const response = await trackPromise(axios.get(`${BASE_URL}qrl/getworld?worldName=${worldName}`))
-            if(response.data.code === "OK") {
+            const response = await trackPromise(axios.get(`${BASE_URL}worlds/${worldName}`))
+            if(response.status === 200) {
                 console.log("Get World Success:\n")
                 return response.data
             }
-            throw new Error(response.data.message)
+            throw new Error("Unable to download world")
         } catch (error) {
             console.error(error)            
         }
