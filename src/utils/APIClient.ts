@@ -243,7 +243,6 @@ export class APIClient {
     // }
 
     async getWorld(worldName:string) {
-
         try {
             const response = await trackPromise(axios.get(`${BASE_URL}worlds/${worldName}`))
             if(response.status === 200) {
