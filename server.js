@@ -3,8 +3,12 @@ const path = require('path')
 const bodyParser = require('body-parser')
 const express = require('express')
 const cors = require('cors')
+const { getData,enterWorld,agentMove } = require('./server_files/qrl')
+const { writeFileSync,readFileSync } = require('fs')
+const { json } = require('body-parser')
 const app = express()
 
+app.use(bodyParser({limit: '50mb',extended: true}))
 app.use('/',express.static(path.join(__dirname,'build')))
 app.use(bodyParser.json())
 app.use(cors())
@@ -20,6 +24,8 @@ axios.interceptors.request.use(function (config) {
 
 
 const BASE_URL = 'https://www.notexponential.com/aip2pgaming/api/index.php'
+const BASE_URL_RL = 'https://www.notexponential.com/aip2pgaming/api/rl/gw.php'
+const BASE_URL_RL_SCORE = 'https://www.notexponential.com/aip2pgaming/api/rl/score.php'
 const API_KEY = 'b50e09d24155e0aee7cc'
 
 function setHeaders() {
@@ -76,6 +82,71 @@ const gameList = async () => {
 }
 
 const PORT = process.env.PORT || 8080
+
+
+
+
+
+
+
+
+
+
+
+
+
+// QRL Routes
+app.get('/qrl/getworld', async (req,res) => {
+    const worldName = req.query['worldName']
+    const fileName = path.join(__dirname + '/server_files/worlds/'+worldName+'.txt')
+    const file = readFileSync(fileName,'utf-8')
+    return res.json({code:'OK',data:file})
+})
+
+app.post('/qrl/saveworld', async (req,res) => {
+    const {worldName,data} = req.body
+    const fileName = path.join(__dirname + '/server_files/worlds/'+worldName+'.txt')
+    const str = JSON.stringify(data)
+    writeFileSync(fileName,str)
+    return res.json({code: 'OK'})
+})
+
+app.get('/qrl/getlocation', async (req,res) => {
+    const data = await getData(`${BASE_URL_RL}?type=location&teamId=1243`)
+    console.log("Location:" , data)
+    res.json(data)
+})
+
+app.get('/qrl/getruns', async (req,res) => {
+    const {teamId} = req.query
+    const data = await getData(`${BASE_URL_RL_SCORE}?type=runs&teamId=${teamId}&count=10`)
+    console.log("Runs:" , data)
+    res.json(data)
+})
+
+app.post('/qrl/enterworld', async (req,res) => {
+    const {worldId, teamId} = req.body
+    const data = await enterWorld(BASE_URL_RL,worldId,teamId)
+    console.log("Enter World:" , data)
+    res.json(data)
+})
+
+app.post('/qrl/move', async (req,res) => {
+    const {worldId, teamId,move} = req.body
+    const data = await agentMove(BASE_URL_RL,worldId,teamId,move)
+    res.json(data)
+})
+
+
+
+
+
+
+
+
+
+
+
 
 app.get('/game/id', async (req,res) => {
     const gameId = req.params[id]
