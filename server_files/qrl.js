@@ -25,3 +25,5 @@ const agentMove = async (url,worldId,teamId,direction) => {
 }
 
 module.exports = {getData,enterWorld,agentMove}
+
+// test
