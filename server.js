@@ -103,7 +103,7 @@ app.get('/qrl/getworld', async (req,res) => {
         const file = readFileSync(fileName,'utf-8')
         return res.json({code:'OK',data:file})
     }
-    return {code:'OK',data:JSON.stringify({q:[],world:[]})}
+    return res.json({code:'OK',data:JSON.stringify({q:[],world:[]})})
 })
 
 app.post('/qrl/saveworld', async (req,res) => {
