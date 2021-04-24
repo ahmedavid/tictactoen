@@ -39,6 +39,8 @@ export class QEnv {
             this.world = makeMatrix(40)
             this.q = makeMatrix(40*40)
         } else {
+            const bytes = new TextEncoder().encode(JSON.stringify(obj))
+            const blob = new Blob([bytes])
             this.world = obj.world.slice()
             this.q = obj.q.slice()
         }
@@ -80,9 +82,11 @@ export class QEnv {
 
     persist() {
         const data = {world: this.world, q: this.q}
-        this.apiClient.saveWorld(this.storageName,data)
-        //localStorage.setItem(this.storageName, JSON.stringify(obj))
-        
+        const bytes = new TextEncoder().encode(JSON.stringify(data))
+        const blob = new Blob([bytes])
+        const formData = new FormData()
+        formData.append('file',blob,this.storageName)
+        this.apiClient.uploadWorld(formData)
     }
 
     retrieve() {
@@ -90,7 +94,7 @@ export class QEnv {
             // const str = localStorage.getItem(this.storageName)
             this.apiClient.getWorld(this.storageName).then(data => {
                 if(data) {
-                    const obj = JSON.parse(data.data)
+                    const obj = {q:data.q,world:data.world}
                     return res(obj)
                 }
                 return res({world:[],q:[]})
