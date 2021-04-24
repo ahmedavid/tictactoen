@@ -143,7 +143,7 @@ export function heuristic_evaluate(state: IGameState,target:number) {
     return scoreO - scoreX
 }
 
-const MAX = Number.MAX_VALUE
+const MAX = 1000000 //Number.MAX_VALUE
 let start_depth = -1
 
 export function minimaxHelper(state: IGameState,target:number,depth: number,player: IPlayer) {
@@ -214,6 +214,9 @@ function minimax(state: IGameState,target:number,depth: number,player: IPlayer,a
         }
         while(actions.length !== 0) {
             const {action,score} = actions.dequeue()
+            // if(action.i === 1 && action.j === 2) {
+            //     debugger
+            // }
             const newState = applyAction(state,player,action)
             const maxEvaluation = minimax(newState, target, depth-1, 1, alpha, beta)
             revertAction(state,action)

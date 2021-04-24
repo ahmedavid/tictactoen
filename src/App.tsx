@@ -10,6 +10,9 @@ import { APIClient } from './utils/APIClient';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Test } from './Games/Test';
+import { QRL } from './qrl/QRL';
+import { WorldRun } from './qrl/Worlds/WorldRun';
+import { QTest } from './qtest/QTest';
 
 const apiClient = APIClient.getInstance()
 
@@ -84,17 +87,27 @@ const App = () => {
       <ToastContainer/>
       <div className="App">
         <Switch>
+          <Route exact path="/qtest">
+            <QTest/>
+          </Route>
+          <Route exact path="/qrl">
+            <QRL apiClient={apiClient} teamId={appState.teamId}/>
+          </Route>
+          <Route exact path="/qrl/world/:worldId">
+            <WorldRun apiClient={apiClient} teamId={appState.teamId}/>
+          </Route>
           <Route exact path="game/test/test/test">
             <GameDetail apiClient={apiClient} teamId={appState.teamId}/>
           </Route>
           <Route path="/game/:team1Id/:team2Id/:gameId">
             <GameDetail apiClient={apiClient} teamId={appState.teamId}/>
           </Route>
-          <Route path="/games">
+          <Route exact path="/games">
             <GameList apiClient={apiClient} team={appState.teamId}/>
           </Route>
+
           <Route path="*" >
-            <Redirect to="/games"/>
+            <Redirect to="/qrl"/>
           </Route>
         </Switch>
       </div>

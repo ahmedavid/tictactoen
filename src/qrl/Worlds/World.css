@@ -1,0 +1,27 @@
+.world {
+    width: 140px;
+    height: 140px;
+    background-color: darksalmon;
+    display: flex;
+    flex: 0 0 30%;
+    justify-content: center;
+    align-items: center;
+    margin: 8px;
+    border-radius: 4px;
+}
+
+.current-world {
+    border: 6px solid lightgreen;
+}
+
+.world:hover .buttons {
+    opacity: 1;
+}
+
+.buttons {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    flex-direction: column;
+}
